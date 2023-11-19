@@ -1,0 +1,57 @@
+{
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "data"],
+
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+
+    //! Type Checking
+    "alwaysStrict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "useUnknownInCatchVariables": true,
+
+    //! Modules
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "rootDir": "src",
+
+    //! Emit
+    "declaration": true,
+    "importHelpers": true,
+    "importsNotUsedAsValues": "error",
+    "inlineSources": true,
+    "newLine": "lf",
+    "noEmitHelpers": true,
+    "outDir": "dist",
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    // "forceConsistentCasingInFileNames": true,
+
+    //! Language and Environment
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": ["ESNext"],
+    "target": "ES2021",
+    "useDefineForClassFields": true,
+
+    "pretty": false,
+    "skipDefaultLibCheck": true
+  }
+}

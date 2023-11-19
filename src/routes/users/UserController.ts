@@ -1,0 +1,81 @@
+import type { Request, Response } from 'express';
+import type { AuthRequest } from '../../middlewares/auth';
+import PaginationService from '../../utils/PaginationUtil';
+import { UserService } from './UserService';
+import BasicError from '../../errors/BasicError';
+import { UsernameRegex } from '../../models/User/UserUtils';
+
+/**
+ * User controller
+ */
+export class UserController {
+  /**
+   * Get all users
+   * @param request
+   * @param res
+   */
+  static async getAll(request: Request, res: Response) {
+    const req = request as AuthRequest<false>;
+    const params = { ...req.query, ...req.body };
+    const pagination = PaginationService.from(params);
+    const scope = req.scope || null;
+
+    const data = await UserService.getAll(pagination, params, { count: true, scope });
+
+    res.status(200).json(data);
+  }
+
+  /**
+   * Get one user
+   * @param request
+   * @param res
+   */
+  static async getOne(request: Request, res: Response) {
+    const req = request as AuthRequest<false>;
+    const { params: { identifier } } = req;
+
+    // get scope
+    const scope = req.user && (identifier === req.user.id || identifier === '@me') ? 'private' : req.scope || null;
+
+    let data = null;
+    if (identifier === '@me' && req.user) data = await UserService.getOne(req.user.id, { scope }); // get current user
+    else if (UsernameRegex.test(identifier)) { // get user by username
+      data = await UserService.getOneByUsername(identifier, { scope });
+    } else data = await UserService.getOne(identifier, { scope }); // get user by id
+
+    if (!data) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+
+    res.status(200).json(data);
+  }
+
+  /**
+   * Delete one user
+   * @param request
+   * @param res
+   */
+  static async deleteOne(request: Request, res: Response) {
+    const req = request as AuthRequest;
+    const { userId } = req.params;
+
+    await UserService.deleteOne(userId);
+
+    res.status(204).send();
+  }
+
+  /**
+   * Update one user
+   * @param request
+   * @param res
+   */
+  static async updateOne(request: Request, res: Response) {
+    const req = request as AuthRequest;
+    const { userId } = req.params;
+
+    const user = await UserService.getOne(userId);
+    if (!user) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+
+    await UserService.updateOne(user, req.body);
+
+    res.status(204).send();
+  }
+}
