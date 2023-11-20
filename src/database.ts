@@ -23,5 +23,5 @@ export const database = new Sequelize({
 });
 
 // database.sync({ force: true }); // Create tables
-database.sync({ alter: true }); // Update tables
+// database.sync({ alter: true }); // Update tables
 // database.drop({ cascade: true }); // Drop tables

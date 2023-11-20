@@ -8,7 +8,10 @@ export const LoginSchema = Joi.object({
   email: Joi.string().email(),
   username: Joi.string().regex(UsernameRegex),
   password: Joi.string().regex(PasswordRegex).required(),
-}).length(2).xor('email', 'username').required();
+})
+  .length(2)
+  .xor('email', 'username')
+  .required();
 
 /**
  * Auth register schema

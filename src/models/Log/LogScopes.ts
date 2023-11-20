@@ -21,5 +21,4 @@ export const LogScopes: { [key in BaseScope]: FindOptions } = {
 
 export type LogScope = keyof typeof LogScopes;
 
-export const LogDefaultScopeName = 'public';
-export default LogScopes[LogDefaultScopeName];
+export default LogScopes.public;

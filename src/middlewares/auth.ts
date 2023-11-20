@@ -112,8 +112,8 @@ export default (options?: AuthOptions) => {
       authRequest.user = user;
 
       authRequest.scope = 'public';
-      if (user.isAdmin) authRequest.scope = 'private';
-      else if (user.isHelper) authRequest.scope = 'internal';
+      if (user.isAdminOrHigher()) authRequest.scope = 'private';
+      else if (user.isHelperOrHigher()) authRequest.scope = 'internal';
 
       next();
     } catch (error) {

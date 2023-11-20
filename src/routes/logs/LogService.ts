@@ -1,6 +1,6 @@
 import { LogModel, type ILogModel } from '../../models/Log/LogModel';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
-import { LogDefaultScopeName, type LogScope } from '../../models/Log/LogScopes';
+import type { LogScope } from '../../models/Log/LogScopes';
 
 // Types
 type IData = Partial<ILogModel>;
@@ -44,7 +44,7 @@ export class LogService {
     query: GetAllQuery,
     options?: GetAllOptions,
   ) {
-    const scope = options?.scope || LogDefaultScopeName;
+    const scope = options?.scope || 'public';
 
     // build where clause
     const where = { } as any;
@@ -81,7 +81,7 @@ export class LogService {
    * @returns
    */
   static async getOne(id: string, options?: Options) {
-    const scope = options?.scope || LogDefaultScopeName;
+    const scope = options?.scope || 'public';
     return LogModel.scope(scope).findOne({ where: { id } });
   }
 

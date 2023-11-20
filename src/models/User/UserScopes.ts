@@ -22,5 +22,4 @@ export const UserScopes: { [key in BaseScope]: FindOptions } = {
 
 export type UserScope = keyof typeof UserScopes;
 
-export const UserDefaultScopeName = 'public';
-export default UserScopes[UserDefaultScopeName];
+export default UserScopes.public;

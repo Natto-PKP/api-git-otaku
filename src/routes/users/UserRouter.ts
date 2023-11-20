@@ -1,13 +1,10 @@
 import { Router } from 'express';
 import { validate } from '../../middlewares/validate';
-import {
-  UserAdminUpdateBodySchema,
-  UserGetAllQuerySchema,
-  UserSelfUpdateBodySchema,
-} from './UserSchema';
+import { UserGetAllQuerySchema } from './UserSchema';
 import { handler } from '../../helpers/handler';
 import { UserController } from './UserController';
 import auth from '../../middlewares/auth';
+import { UserValidation } from './UserValidation';
 
 export const UserRouter = Router();
 
@@ -64,9 +61,6 @@ UserRouter.delete(
 UserRouter.patch(
   '/:userId',
   handler(auth({ roles: ['ADMIN', 'OWNER'], self: 'userId' })),
-  validate({
-    SELF: UserSelfUpdateBodySchema, // apply only if self
-    ADMIN: UserAdminUpdateBodySchema, // apply only if admin
-  }, ['body'], { self: 'userId' }), // indicate where to get the user id
+  handler(UserValidation.updateOne),
   handler(UserController.updateOne),
 );

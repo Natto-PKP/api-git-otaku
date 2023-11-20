@@ -1,7 +1,8 @@
 import { Op } from 'sequelize';
 import { UserModel, type IUserModel } from '../../models/User/UserModel';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
-import { UserDefaultScopeName, type UserScope } from '../../models/User/UserScopes';
+import type { UserScope } from '../../models/User/UserScopes';
+import { USER_ROLE_HIERARCHY } from '../../models/User/UserUtils';
 
 // Types
 type IData = Partial<IUserModel>;
@@ -53,7 +54,7 @@ export class UserService {
     query: GetAllQuery,
     options?: GetAllOptions,
   ) {
-    const scope = options?.scope || UserDefaultScopeName; // get scope
+    const scope = options?.scope || 'public'; // get scope
 
     // build where clause
     const where = { } as any;
@@ -99,7 +100,7 @@ export class UserService {
    * @returns
    */
   static async getOne(id: string, options?: Options) {
-    const scope = options?.scope || UserDefaultScopeName;
+    const scope = options?.scope || 'public';
     return UserModel.scope(scope).findOne({ where: { id } });
   }
 
@@ -111,7 +112,7 @@ export class UserService {
    * @returns
    */
   static async getOneByUsernameOrEmail(username: string, email: string, options?: Options) {
-    const scope = options?.scope || UserDefaultScopeName; // get scope
+    const scope = options?.scope || 'public'; // get scope
 
     // build or clause
     const or = [];
@@ -128,7 +129,7 @@ export class UserService {
    * @returns
    */
   static async getOneByUsername(username: string, options?: Options) {
-    const scope = options?.scope || UserDefaultScopeName;
+    const scope = options?.scope || 'public';
     return UserModel.scope(scope).findOne({ where: { username } });
   }
 
@@ -139,7 +140,7 @@ export class UserService {
    * @returns
    */
   static async getOneByEmail(email: string, options?: Options) {
-    const scope = options?.scope || UserDefaultScopeName;
+    const scope = options?.scope || 'public';
     return UserModel.scope(scope).findOne({ where: { email } });
   }
 
@@ -160,5 +161,9 @@ export class UserService {
   static async updateOne(user: string | UserModel | IUserModel, data: IData) {
     if (typeof user === 'string') await UserModel.update(data, { where: { id: user } });
     else await UserModel.update(data, { where: { id: user.id } });
+  }
+
+  static getRoleHierarchy(role: keyof typeof USER_ROLE_HIERARCHY) {
+    return USER_ROLE_HIERARCHY[role];
   }
 }

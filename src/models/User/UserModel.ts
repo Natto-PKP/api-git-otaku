@@ -12,7 +12,7 @@ import bcrypt from 'bcrypt';
 
 import { BaseModel, IBaseModel } from '..';
 import {
-  PseudoRegex, UsernameRegex, UserRoles, type UserRole,
+  PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY,
 } from './UserUtils';
 import defaultScope, { UserScopes } from './UserScopes';
 
@@ -28,9 +28,6 @@ export interface IUserModel extends IBaseModel {
   blockedUntil?: Date | null;
   isBanned: boolean;
   isPrivate: boolean;
-
-  isAdmin: boolean;
-  isHelper: boolean;
 }
 
 @Scopes(() => UserScopes)
@@ -88,19 +85,36 @@ export class UserModel extends BaseModel implements IUserModel {
   @Column({ type: DataType.BOOLEAN })
   declare isPrivate: boolean;
 
-  @Column({
-    type: DataType.VIRTUAL,
-    get(this: UserModel) {
-      return this.role === 'ADMIN' || this.role === 'OWNER';
-    },
-  })
-  declare isAdmin: boolean;
+  // methods
+  /**
+   * Check if user role is higher than the given role
+   * @param than
+   * @returns
+   */
+  isRoleHigher(than: UserRole) {
+    const role = this.getDataValue('role') as UserRole;
+    return USER_ROLE_HIERARCHY[role] > USER_ROLE_HIERARCHY[than];
+  }
 
-  @Column({
-    type: DataType.VIRTUAL,
-    get(this: UserModel) {
-      return this.role === 'HELPER';
-    },
-  })
-  declare isHelper: boolean;
+  /**
+   * Check if user role is higher or equal to the given role
+   * @param than
+   * @returns
+   */
+  isRoleHigherOrEqual(than: UserRole) {
+    const role = this.getDataValue('role') as UserRole;
+    return USER_ROLE_HIERARCHY[role] >= USER_ROLE_HIERARCHY[than];
+  }
+
+  isAdminOrHigher() {
+    return this.isRoleHigherOrEqual('ADMIN');
+  }
+
+  isHelperOrHigher() {
+    return this.isRoleHigherOrEqual('HELPER');
+  }
+
+  isOwner() {
+    return this.role === 'OWNER';
+  }
 }

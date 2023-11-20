@@ -1,57 +1,19 @@
 {
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "data"],
+  "include": ["src"], // Where to look for files to compile
+  "exclude": ["node_modules", "dist", "**/**.test.ts"], // What to ignore when compiling
 
   "compilerOptions": {
-    "ignoreDeprecations": "5.0",
+    "outDir": "dist", // Where to put compiled files
+    "module": "CommonJS", // How to compile modules
+    "target": "ESNext", // What JS version to compile to
+    "rootDir": "src", // Where to look for files to compile
+    "sourceMap": true, // Generate sourcemaps
+    "declaration": true, // Generate type definitions
 
-    //! Type Checking
-    "alwaysStrict": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "exactOptionalPropertyTypes": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitOverride": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "strict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "useUnknownInCatchVariables": true,
+    "strict": true, // Enable all strict type-checking options
+    "noImplicitAny": true, // Disallow `any` types
 
-    //! Modules
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "rootDir": "src",
-
-    //! Emit
-    "declaration": true,
-    "importHelpers": true,
-    "importsNotUsedAsValues": "error",
-    "inlineSources": true,
-    "newLine": "lf",
-    "noEmitHelpers": true,
-    "outDir": "dist",
-    "preserveConstEnums": true,
-    "removeComments": false,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    // "forceConsistentCasingInFileNames": true,
-
-    //! Language and Environment
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "lib": ["ESNext"],
-    "target": "ES2021",
-    "useDefineForClassFields": true,
-
-    "pretty": false,
-    "skipDefaultLibCheck": true
+    "esModuleInterop": true, // Enable `import x from 'y'` syntax
+    "experimentalDecorators": true // Enable experimental decorators
   }
 }
