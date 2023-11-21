@@ -124,12 +124,12 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Column({ type: DataType.DATE })
   declare finishedAt: Date | null;
 
-  @BelongsTo(() => UserModel, 'userId')
+  @BelongsTo(() => UserModel, { foreignKey: 'userId', onDelete: 'CASCADE' })
   declare user: UserSanctionModel;
 
-  @BelongsTo(() => UserModel, 'byUserId')
+  @BelongsTo(() => UserModel, { foreignKey: 'byUserId', onDelete: 'SET NULL' })
   declare byUser: UserModel;
 
-  @BelongsTo(() => UserModel, 'cancelledByUserId')
+  @BelongsTo(() => UserModel, { foreignKey: 'cancelledByUserId', onDelete: 'SET NULL' })
   declare cancelledByUser: UserModel;
 }

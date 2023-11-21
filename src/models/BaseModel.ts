@@ -1,14 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import {
-  Model,
-  Column,
-  Default,
-  PrimaryKey,
-  DataType,
-  ForeignKey,
-  BelongsTo,
-  AllowNull,
-} from 'sequelize-typescript';
+import { Model, Column, Default, PrimaryKey, DataType, ForeignKey, BelongsTo, AllowNull } from 'sequelize-typescript';
 import { UserModel } from '.';
 
 // Types
@@ -32,7 +23,7 @@ export class BaseModel extends Model implements IBaseModel {
   @Column({ type: DataType.TEXT })
   declare updatedById: string;
 
-  @BelongsTo(() => UserModel, 'updatedById')
+  @BelongsTo(() => UserModel, { foreignKey: 'updatedById', onDelete: 'SET NULL' })
   declare updatedBy: UserModel;
 
   @AllowNull(true)
@@ -40,6 +31,6 @@ export class BaseModel extends Model implements IBaseModel {
   @Column({ type: DataType.TEXT })
   declare createdById: string;
 
-  @BelongsTo(() => UserModel, 'createdById')
+  @BelongsTo(() => UserModel, { foreignKey: 'createdById', onDelete: 'SET NULL' })
   declare createdBy: UserModel;
 }

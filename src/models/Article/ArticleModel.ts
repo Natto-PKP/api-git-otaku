@@ -52,6 +52,7 @@ export interface IArticleModel extends IBaseModel {
   // franchise: string;
   // series: string;
   // copyright?: string | null;
+  // contributors: string[];
 }
 
 @Table({ tableName: 'article' })
@@ -150,6 +151,6 @@ export class ArticleModel extends BaseModel {
   @Column({ type: DataType.UUID })
   declare fromArticleId?: string | null;
 
-  @BelongsTo(() => ArticleModel, 'fromArticleId')
+  @BelongsTo(() => ArticleModel, { foreignKey: 'fromArticleId', onDelete: 'CASCADE' })
   declare fromArticle: ArticleModel | null;
 }
