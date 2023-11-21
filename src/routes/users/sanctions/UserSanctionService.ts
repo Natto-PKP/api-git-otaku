@@ -66,6 +66,11 @@ export class UserSanctionService {
     return UserSanctionModel.scope(scope).findByPk(id);
   }
 
+  static async getOneByUserId(id: string, userId: string, options?: Options) {
+    const scope = options?.scope || 'public';
+    return UserSanctionModel.scope(scope).findOne({ where: { id, userId } });
+  }
+
   static async deleteOne(sanction: string | UserSanctionModel | IUserSanctionModel) {
     if (typeof sanction === 'string') await UserSanctionModel.destroy({ where: { id: sanction } });
     else await UserSanctionModel.destroy({ where: { id: sanction.id } });

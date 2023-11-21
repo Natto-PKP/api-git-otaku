@@ -6,7 +6,6 @@ describe('UserSanctionGetAllQuerySchema', () => {
     expect.assertions(1);
 
     const data = {
-      userId: uuid(),
       type: 'BAN',
       askCancellation: true,
       isCancelled: false,

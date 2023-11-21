@@ -1,11 +1,8 @@
 import supertest from 'supertest';
-import { v4 as uuid } from 'uuid';
 
 import { IUserSanctionModel, UserModel, UserSanctionModel } from '../../../models';
 import { server } from '../../../server';
 import { AuthService } from '../../auth/AuthService';
-
-const randomUUID = uuid();
 
 const userData = {
   email: 'user@domain.com',
@@ -56,7 +53,7 @@ describe('GET /users/:userId/sanctions', () => {
     const accessToken = await AuthService.generateJwtAccessToken(admin);
     const cookies = [`accessToken=${accessToken}`];
 
-    const response = await request.get(`/users/${user.id}/sanctions?userId=${randomUUID}`).set('Cookie', cookies);
+    const response = await request.get(`/users/${user.id}/sanctions?type=BAN`).set('Cookie', cookies);
 
     expect(response.status).toBe(200);
 
@@ -73,9 +70,7 @@ describe('GET /users/:userId/sanctions', () => {
     const accessToken = await AuthService.generateJwtAccessToken(admin);
     const cookies = [`accessToken=${accessToken}`];
 
-    const response = await request
-      .get(`/users/${user.id}/sanctions?userId=${randomUUID}&page=1&limit=10`)
-      .set('Cookie', cookies);
+    const response = await request.get(`/users/${user.id}/sanctions?type=BAN&page=1&limit=10`).set('Cookie', cookies);
 
     expect(response.status).toBe(200);
 

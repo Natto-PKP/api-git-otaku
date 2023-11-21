@@ -12,7 +12,11 @@ export class UserSanctionController {
     const pagination = PaginationService.from(params);
     const scope = req.scope;
 
-    const data = await UserSanctionService.getAll(pagination, params, { count: true, scope });
+    const data = await UserSanctionService.getAll(
+      pagination,
+      { ...params, userId: req.params.userId },
+      { count: true, scope },
+    );
 
     res.status(200).json(data);
   }
@@ -22,10 +26,10 @@ export class UserSanctionController {
     const scope = req.scope;
 
     const {
-      params: { sanctionId },
+      params: { sanctionId, userId },
     } = req;
 
-    const data = await UserSanctionService.getOne(sanctionId, { scope });
+    const data = await UserSanctionService.getOneByUserId(sanctionId, userId, { scope });
 
     if (!data) {
       throw new BasicError(
@@ -82,10 +86,10 @@ export class UserSanctionController {
   static async cancelOne(request: Request, res: Response) {
     const req = request as AuthRequest;
     const {
-      params: { sanctionId },
+      params: { sanctionId, userId },
     } = req;
 
-    const sanction = await UserSanctionService.getOne(sanctionId);
+    const sanction = await UserSanctionService.getOneByUserId(sanctionId, userId);
 
     if (!sanction) {
       throw new BasicError(

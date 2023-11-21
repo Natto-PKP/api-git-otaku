@@ -2,7 +2,6 @@ import Joi from 'joi';
 import { UserSanctionTypes } from '../../../models/User/Sanction/UserSanctionUtils';
 
 export const UserSanctionGetAllQuerySchema = Joi.object({
-  userId: Joi.string().uuid(),
   type: Joi.string().valid(...UserSanctionTypes),
   askCancellation: Joi.boolean(),
   isCancelled: Joi.boolean(),
