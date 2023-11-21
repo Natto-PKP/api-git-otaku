@@ -16,9 +16,9 @@ export const LogRouter = Router();
  */
 LogRouter.get(
   '/',
-  handler(auth({ roles: ['ADMIN', 'HELPER', 'OWNER'] })), // you need to be admin or helper to get logs
+  handler(auth({ adminOnly: true })), // you need to be admin or helper to get logs
   validate(LogGetAllQuerySchema, ['body', 'query']),
-  handler(LogController.getAll),
+  handler(LogController.getAll)
 );
 
 /**
@@ -30,8 +30,8 @@ LogRouter.get(
  */
 LogRouter.get(
   '/:logId',
-  handler(auth({ roles: ['ADMIN', 'HELPER', 'OWNER'] })), // you need to be admin or helper to get a log
-  handler(LogController.getOne),
+  handler(auth({ adminOnly: true })), // you need to be admin or helper to get a log
+  handler(LogController.getOne)
 );
 
 /**
@@ -42,6 +42,6 @@ LogRouter.get(
  */
 LogRouter.delete(
   '/:logId',
-  handler(auth({ roles: ['ADMIN', 'OWNER'] })), // you need to be admin to delete a log
-  handler(LogController.deleteOne),
+  handler(auth({ adminOnly: true })), // you need to be admin to delete a log
+  handler(LogController.deleteOne)
 );

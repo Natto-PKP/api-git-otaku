@@ -25,12 +25,6 @@ interface AuthOptions {
   ignoreBlockedUser?: boolean | null;
 
   /**
-   * If true, the middleware will check user role
-   * @default null
-   */
-  roles?: UserRole[] | null;
-
-  /**
    * If true, the middleware will throw an error if the user is not authenticated
    * @default true
    */
@@ -42,6 +36,18 @@ interface AuthOptions {
    * @default null
    */
   self?: string | null;
+
+  /**
+   * If true, the middleware will check if the user is admin or higher
+   * @default false
+   */
+  adminOnly?: boolean | null;
+
+  /**
+   * If true, the middleware will check if the user is helper or higher
+   * @default false
+   */
+  helperOnly?: boolean | null;
 }
 
 export type BaseScope = 'public' | 'internal' | 'private' | 'system';
@@ -68,7 +74,8 @@ export default (options?: AuthOptions) => {
   const logit = options?.logit ?? false;
   const ignoreBannedUser = options?.ignoreBannedUser ?? false;
   const ignoreBlockedUser = options?.ignoreBlockedUser ?? false;
-  const roles = options?.roles ?? null;
+  const adminOnly = options?.adminOnly ?? false;
+  const helperOnly = options?.helperOnly ?? false;
   const self = options?.self ?? null;
 
   const controller = async (req: Request, _res: Response, next: NextFunction) => {
@@ -82,15 +89,18 @@ export default (options?: AuthOptions) => {
       if (!decoded) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
 
       // check token validity
-      if (!decoded.id || !decoded.exp) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
-      if (Date.now() / 1000 >= decoded.exp) throw new BasicError({ type: 'ERROR', code: 'TOKEN_EXPIRED', status: 401 }, { logit });
+      if (!decoded.id || !decoded.exp)
+        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+      if (Date.now() / 1000 >= decoded.exp)
+        throw new BasicError({ type: 'ERROR', code: 'TOKEN_EXPIRED', status: 401 }, { logit });
 
       // check user validity
       const user = await UserService.getOne(decoded.id);
       if (!user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
 
       // check if user is banned
-      if (user.isBanned && !ignoreBannedUser) throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit });
+      if (user.isBanned && !ignoreBannedUser)
+        throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit });
 
       // check if user is blocked
       if (user.isBlocked) {
@@ -102,10 +112,23 @@ export default (options?: AuthOptions) => {
       }
 
       // check user role
-      if (roles) {
-        if (!self && !roles.includes(user.role)) throw new BasicError({ type: 'ERROR', code: 'MISSING_PERMISSION', status: 403 }, { logit });
-        else if (self && req.params[self] !== user.id) throw new BasicError({ type: 'ERROR', code: 'MISSING_PERMISSION', status: 403 }, { logit });
-      } else if (self && req.params[self] !== user.id) throw new BasicError({ type: 'ERROR', code: 'MISSING_PERMISSION', status: 403 }, { logit });
+      if ((self && req.params[self] !== user.id) || !self) {
+        if (adminOnly && !user.isAdminOrHigher())
+          throw new BasicError(
+            { type: 'ERROR', code: 'MISSING_PERMISSION', status: 403, message: 'Only admins can access this resource' },
+            { logit }
+          );
+        else if (helperOnly && !user.isHelperOrHigher())
+          throw new BasicError(
+            {
+              type: 'ERROR',
+              code: 'MISSING_PERMISSION',
+              status: 403,
+              message: 'Only helpers can access this resource',
+            },
+            { logit }
+          );
+      }
 
       // auth request
       const authRequest = req as AuthRequest;

@@ -32,14 +32,17 @@ export class UserController {
    */
   static async getOne(request: Request, res: Response) {
     const req = request as AuthRequest<false>;
-    const { params: { identifier } } = req;
+    const {
+      params: { identifier },
+    } = req;
 
     // get scope
     const scope = req.user && (identifier === req.user.id || identifier === '@me') ? 'private' : req.scope || null;
 
     let data = null;
     if (identifier === '@me' && req.user) data = await UserService.getOne(req.user.id, { scope }); // get current user
-    else if (UsernameRegex.test(identifier)) { // get user by username
+    else if (UsernameRegex.test(identifier)) {
+      // get user by username
       data = await UserService.getOneByUsername(identifier, { scope });
     } else data = await UserService.getOne(identifier, { scope }); // get user by id
 
@@ -57,7 +60,10 @@ export class UserController {
     const req = request as AuthRequest;
     const { userId } = req.params;
 
-    await UserService.deleteOne(userId);
+    const user = await UserService.getOne(userId);
+    if (!user) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+
+    await UserService.deleteOne(user);
 
     res.status(204).send();
   }
@@ -76,6 +82,6 @@ export class UserController {
 
     await UserService.updateOne(user, req.body);
 
-    res.status(204).send();
+    res.status(200).send();
   }
 }

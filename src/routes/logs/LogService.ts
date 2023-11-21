@@ -39,15 +39,11 @@ export class LogService {
    * @param options
    * @returns
    */
-  static async getAll(
-    pagination: IPaginationFrom,
-    query: GetAllQuery,
-    options?: GetAllOptions,
-  ) {
+  static async getAll(pagination: IPaginationFrom, query: GetAllQuery, options?: GetAllOptions) {
     const scope = options?.scope || 'public';
 
     // build where clause
-    const where = { } as any;
+    const where = {} as { [key: string]: unknown };
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;
     if (query.code) where.code = query.code;
@@ -64,7 +60,7 @@ export class LogService {
       limit: pagination.limit,
     };
 
-    if (options?.count) { // if count is true
+    if (options?.count) {
       const total = await LogModel.count({ where });
       result.totalPage = Math.ceil(total / pagination.limit);
       result.total = total;

@@ -18,7 +18,7 @@ UserRouter.get(
   '/',
   handler(auth({ required: false })), // auth middleware, but not required
   validate(UserGetAllQuerySchema, ['body', 'query'], { authRequired: false }), // validate query
-  handler(UserController.getAll), // handle request
+  handler(UserController.getAll) // handle request
 );
 
 /**
@@ -33,7 +33,7 @@ UserRouter.get(
 UserRouter.get(
   '/:identifier',
   handler(auth({ required: false })), // can't use @me if not logged in
-  handler(UserController.getOne),
+  handler(UserController.getOne)
 );
 
 /**
@@ -43,11 +43,7 @@ UserRouter.get(
  * @param {string} userId.param.required - The user id
  * @returns {IUserModel} 201 - The created user info
  */
-UserRouter.delete(
-  '/:userId',
-  handler(auth({ roles: ['ADMIN', 'OWNER'], self: 'userId' })),
-  handler(UserController.deleteOne),
-);
+UserRouter.delete('/:userId', handler(auth({ adminOnly: true, self: 'userId' })), handler(UserController.deleteOne));
 
 /**
  * Create a new user
@@ -60,7 +56,7 @@ UserRouter.delete(
  */
 UserRouter.patch(
   '/:userId',
-  handler(auth({ roles: ['ADMIN', 'OWNER'], self: 'userId' })),
+  handler(auth({ adminOnly: true, self: 'userId' })),
   handler(UserValidation.updateOne),
-  handler(UserController.updateOne),
+  handler(UserController.updateOne)
 );

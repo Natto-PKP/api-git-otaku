@@ -37,27 +37,6 @@ const logData = {
 const request = supertest(server);
 
 describe('GET /logs', () => {
-  it('should get all logs when the user is a helper', async () => {
-    expect.assertions(3);
-
-    const user = await UserModel.create(userHelperData);
-    const accessToken = await AuthService.generateJwtAccessToken(user);
-    const refreshToken = await AuthService.generateJwtRefreshToken(user);
-
-    const cookies = [
-      `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
-      `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
-    ];
-
-    const response = await request.get('/logs').set('Cookie', cookies);
-
-    await user.destroy();
-
-    expect(response.status).toBe(200);
-    expect(response.body).toBeDefined();
-    expect(Array.isArray(response.body.data)).toBeTruthy();
-  });
-
   it('should get all logs when the user is an admin', async () => {
     expect.assertions(3);
 
@@ -108,30 +87,6 @@ describe('GET /logs', () => {
 });
 
 describe('GET /logs/:id', () => {
-  it('should get a log when the user is a helper', async () => {
-    expect.assertions(3);
-
-    const user = await UserModel.create(userHelperData);
-    const accessToken = await AuthService.generateJwtAccessToken(user);
-    const refreshToken = await AuthService.generateJwtRefreshToken(user);
-
-    const log = await LogModel.create(logData);
-
-    const cookies = [
-      `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
-      `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
-    ];
-
-    const response = await request.get(`/logs/${log.id}`).set('Cookie', cookies);
-
-    await user.destroy();
-    await log.destroy();
-
-    expect(response.status).toBe(200);
-    expect(response.body).toBeDefined();
-    expect(response.body.id).toBe(log.id);
-  });
-
   it('should get a log when the user is an admin', async () => {
     expect.assertions(3);
 
