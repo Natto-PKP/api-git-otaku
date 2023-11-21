@@ -5,8 +5,11 @@ import { handler } from '../../helpers/handler';
 import { UserController } from './UserController';
 import auth from '../../middlewares/auth';
 import { UserValidation } from './UserValidation';
+import { UserSanctionRouter } from './sanctions/UserSanctionRouter';
 
 export const UserRouter = Router();
+
+UserRouter.use('/:userId/sanctions', UserSanctionRouter);
 
 /**
  * Get all users
@@ -18,7 +21,7 @@ UserRouter.get(
   '/',
   handler(auth({ required: false })), // auth middleware, but not required
   validate(UserGetAllQuerySchema, ['body', 'query'], { authRequired: false }), // validate query
-  handler(UserController.getAll) // handle request
+  handler(UserController.getAll), // handle request
 );
 
 /**
@@ -33,7 +36,7 @@ UserRouter.get(
 UserRouter.get(
   '/:identifier',
   handler(auth({ required: false })), // can't use @me if not logged in
-  handler(UserController.getOne)
+  handler(UserController.getOne),
 );
 
 /**
@@ -58,5 +61,5 @@ UserRouter.patch(
   '/:userId',
   handler(auth({ adminOnly: true, self: 'userId' })),
   handler(UserValidation.updateOne),
-  handler(UserController.updateOne)
+  handler(UserController.updateOne),
 );

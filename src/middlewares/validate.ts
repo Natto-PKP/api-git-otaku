@@ -12,13 +12,13 @@ type Options = {
    * If true, the middleware will throw an error if the user is not authenticated
    * @default true
    */
-  authRequired?: boolean,
+  authRequired?: boolean;
 
   /**
    * If true, the middleware will validate the request body as self
    * @default null
    */
-  self?: string
+  self?: string;
 };
 
 /**
@@ -35,11 +35,12 @@ export const validate = (schema: SchemaOptions, props: Prop[] = ['body'], option
     const req = request as AuthRequest<false>; // get request
 
     // check if user is authenticated if required
-    if (authRequired && !req.user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+    if (authRequired && !req.user)
+      throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
 
     const schemas = Array.isArray(schema) ? schema : [schema]; // get schemas
 
-    let params = { } as any; // get params
+    let params = {} as { [key: string]: unknown }; // get params
     if (props.includes('body')) params = { ...params, ...req.body };
     if (props.includes('params')) params = { ...params, ...req.params };
     if (props.includes('query')) params = { ...params, ...req.query };

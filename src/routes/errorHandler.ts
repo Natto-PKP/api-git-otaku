@@ -45,6 +45,8 @@ export default async (error: Error, req: Request, res: Response, _next: NextFunc
     };
   } else logit = true; // if error is not a BasicError or a Joi.ValidationError, log it
 
+  if (params.status === 500) console.error(error); // if status is 500, log error
+
   res.status(params.status).json(params); // send error response
 
   if (logit) {

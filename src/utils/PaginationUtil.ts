@@ -1,33 +1,17 @@
-import Joi from 'joi';
-
 // Magic numbers
-const MIN_LIMIT = 0;
-const MAX_LIMIT = 200;
-const DEFAULT_LIMIT = 100;
-
-// Schemas
-const PaginationLimitSchema = Joi.number().min(MIN_LIMIT).max(MAX_LIMIT);
-
-export const PaginationQuery = Joi.alternatives(
-  Joi.object().keys({
-    limit: PaginationLimitSchema,
-    page: Joi.number().min(0),
-  }).unknown(true),
-  Joi.object().keys({
-    limit: PaginationLimitSchema,
-    offset: Joi.number().min(0),
-  }).unknown(true),
-);
+export const MIN_LIMIT = 0;
+export const MAX_LIMIT = 200;
+export const DEFAULT_LIMIT = 100;
 
 // Types
-export type IPagination = ({ offset: number } | { page: number }) & { limit: number };
-export type IPaginationFrom = { offset: number, limit: number, page: number };
+export type IPagination = { page: number; limit: number };
+export type IPaginationFrom = { offset: number; limit: number; page: number };
 
 /**
  * Pagination service
  * @description Service to handle pagination
  */
-export default class PaginationService {
+export class PaginationService {
   /**
    * Get limit
    * @param limit
@@ -66,7 +50,9 @@ export default class PaginationService {
    * @returns
    */
   static calcOffset(page: number, limit: number) {
-    return page * limit;
+    const l = PaginationService.getLimit(limit);
+    const p = PaginationService.getPage(page);
+    return p * l;
   }
 
   /**
@@ -75,19 +61,13 @@ export default class PaginationService {
    * @returns
    */
   static from(pagination?: Partial<IPagination>): IPaginationFrom {
-    if (pagination) { // if pagination is defined
+    if (pagination) {
       const limit = PaginationService.getLimit(pagination.limit);
-
-      if ('offset' in pagination) { // if offset is defined, then calculate from offset
-        const offset = PaginationService.getOffset(pagination.offset);
-        const page = Math.floor(offset / limit);
-        return { offset, limit, page };
-      }
-
-      // else caculate from page
-      const page = PaginationService.getPage('page' in pagination ? pagination.page : 0);
+      const page = PaginationService.getPage(pagination.page || 0);
       const offset = PaginationService.calcOffset(page, limit);
       return { offset, limit, page };
-    } return { offset: 0, limit: DEFAULT_LIMIT, page: 0 }; // else return default pagination
+    }
+
+    return { offset: 0, limit: DEFAULT_LIMIT, page: 0 }; // else return default pagination
   }
 }

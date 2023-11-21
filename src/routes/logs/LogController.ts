@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import PaginationService from '../../utils/PaginationUtil';
+import { PaginationService } from '../../utils/PaginationUtil';
 import { LogService } from './LogService';
 import BasicError from '../../errors/BasicError';
 import type { AuthRequest } from '../../middlewares/auth';
@@ -31,7 +31,10 @@ export class LogController {
    */
   static async getOne(request: Request, res: Response) {
     const req = request as AuthRequest;
-    const { scope, params: { logId } } = req;
+    const {
+      scope,
+      params: { logId },
+    } = req;
 
     const data = await LogService.getOne(logId, { scope });
     if (!data) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });

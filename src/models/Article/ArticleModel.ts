@@ -1,16 +1,7 @@
-import {
-  Table,
-  Column,
-  DataType,
-  Unique,
-  AllowNull,
-  Default,
-  ForeignKey,
-  BelongsTo,
-} from 'sequelize-typescript';
+import { Table, Column, DataType, Unique, AllowNull, Default, ForeignKey, BelongsTo } from 'sequelize-typescript';
 
 import { BaseModel, IBaseModel } from '../BaseModel';
-import IdentifierService from '../../utils/IdentifierUtil';
+import { IdentifierService } from '../../utils/IdentifierUtil';
 import {
   ArticleTypes,
   type ArticleStatus,

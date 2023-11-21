@@ -12,27 +12,27 @@ type BaseOptions = {
   /**
    * Characters to use
    */
-  characters: ('number' | 'lower' | 'upper')[],
+  characters: ('number' | 'lower' | 'upper')[];
 
   /**
    * Length of identifier
    */
-  length: number
+  length: number;
 };
 
 /**
  * Identifier service
  * @description Service to handle and generate identifier
  */
-export default class IdentifierService {
+export class IdentifierService {
   /**
    * Generate identifier
    * @param options
    * @returns
    */
-  static generate(options?: BaseOptions) {
+  static generate(options?: Partial<BaseOptions>) {
     const length = options?.length || DEFAULT_LENGTH;
-    const characters = (options?.characters.length && options.characters) || DEFAULT_CHARACTERS;
+    const characters = (options?.characters?.length && options.characters) || DEFAULT_CHARACTERS;
 
     const arr: string[] = [];
     if (characters.includes('lower')) arr.push(...lowers);
@@ -49,9 +49,9 @@ export default class IdentifierService {
    * @param options
    * @returns
    */
-  static isIdentifier(str: string, options?: BaseOptions & { isSearch?: boolean }) {
+  static isIdentifier(str: string, options?: Partial<BaseOptions> & { isSearch?: boolean }) {
     const length = options?.length || DEFAULT_LENGTH;
-    const characters = (options?.characters.length && options.characters) || DEFAULT_CHARACTERS;
+    const characters = (options?.characters?.length && options.characters) || DEFAULT_CHARACTERS;
     const isSearch = Boolean(options?.isSearch);
     let dynamic = '';
 

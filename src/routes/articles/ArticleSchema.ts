@@ -5,21 +5,32 @@ import { ArticleStatuses, ArticleTypes, ArticleVisibilities } from '../../models
  * Article get all query schema
  */
 export const ArticleGetAllQuerySchema = Joi.object({
-  type: Joi.string().valid(...ArticleTypes).optional(),
-  status: Joi.string().valid(...ArticleStatuses).optional(),
-  visibility: Joi.string().valid(...ArticleVisibilities).optional(),
+  type: Joi.string()
+    .valid(...ArticleTypes)
+    .optional(),
+  status: Joi.string()
+    .valid(...ArticleStatuses)
+    .optional(),
+  visibility: Joi.string()
+    .valid(...ArticleVisibilities)
+    .optional(),
   search: Joi.string().optional(),
-  page: Joi.number().integer().positive().optional(),
+  page: Joi.number().integer().positive().allow(0).optional(),
   limit: Joi.number().integer().positive().optional(),
-  offset: Joi.number().integer().positive().optional(),
 });
 
 const Body = {
   title: Joi.string().optional(),
   content: Joi.string().optional(),
-  type: Joi.string().valid(...ArticleTypes).optional(),
-  status: Joi.string().valid(...ArticleStatuses).optional(),
-  aliases: Joi.array().items(Joi.string().not(Joi.ref('title'))).optional(),
+  type: Joi.string()
+    .valid(...ArticleTypes)
+    .optional(),
+  status: Joi.string()
+    .valid(...ArticleStatuses)
+    .optional(),
+  aliases: Joi.array()
+    .items(Joi.string().not(Joi.ref('title')))
+    .optional(),
   description: Joi.string().optional(),
   synopsis: Joi.string().optional(),
   // if status is not PENDING, then beginAt can be defined

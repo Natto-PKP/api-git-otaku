@@ -10,7 +10,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'INTERNAL_SERVER_ERROR',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeUndefined();
@@ -33,7 +32,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'INTERNAL_SERVER_ERROR',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -48,7 +46,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'INTERNAL_SERVER_ERROR',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -63,7 +60,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'WRONG_CODE',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -78,7 +74,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'INTERNAL_SERVER_ERROR',
       page: -1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -93,22 +88,6 @@ describe('LogGetAllQuerySchema', () => {
       code: 'INTERNAL_SERVER_ERROR',
       page: 1,
       limit: -1,
-      offset: 0,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong offset', async () => {
-    expect.assertions(1);
-
-    const { error } = LogGetAllQuerySchema.validate({
-      type: 'ERROR',
-      status: 500,
-      code: 'INTERNAL_SERVER_ERROR',
-      page: 1,
-      limit: 10,
-      offset: -1,
     });
 
     expect(error).toBeDefined();

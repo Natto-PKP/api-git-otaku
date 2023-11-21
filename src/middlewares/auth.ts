@@ -3,7 +3,7 @@ import BasicError from '../errors/BasicError';
 import type { UserModel } from '../models/User/UserModel';
 import { UserService } from '../routes/users/UserService';
 import { AuthService } from '../routes/auth/AuthService';
-import type { UserRole } from '../models/User/UserUtils';
+// import type { UserRole } from '../models/User/UserUtils';
 
 // Types
 interface AuthOptions {
@@ -72,8 +72,8 @@ export interface AuthRequest<R extends boolean = true> extends Request {
 export default (options?: AuthOptions) => {
   const required = options?.required ?? true;
   const logit = options?.logit ?? false;
-  const ignoreBannedUser = options?.ignoreBannedUser ?? false;
-  const ignoreBlockedUser = options?.ignoreBlockedUser ?? false;
+  // const ignoreBannedUser = options?.ignoreBannedUser ?? false;
+  // const ignoreBlockedUser = options?.ignoreBlockedUser ?? false;
   const adminOnly = options?.adminOnly ?? false;
   const helperOnly = options?.helperOnly ?? false;
   const self = options?.self ?? null;
@@ -99,17 +99,17 @@ export default (options?: AuthOptions) => {
       if (!user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
 
       // check if user is banned
-      if (user.isBanned && !ignoreBannedUser)
-        throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit });
+      // if (user.isBanned && !ignoreBannedUser)
+      //   throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit });
 
-      // check if user is blocked
-      if (user.isBlocked) {
-        const blockedUntil = user.blockedUntil?.getTime() || null;
-        if (!blockedUntil) UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
-        else if (Date.now() >= blockedUntil) {
-          await UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
-        } else if (!ignoreBlockedUser) throw new BasicError({ type: 'ERROR', code: 'BLOCKED', status: 403 }, { logit });
-      }
+      // // check if user is blocked
+      // if (user.isBlocked) {
+      //   const blockedUntil = user.blockedUntil?.getTime() || null;
+      //   if (!blockedUntil) UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
+      //   else if (Date.now() >= blockedUntil) {
+      //     await UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
+      //   } else if (!ignoreBlockedUser) throw new BasicError({ type: 'ERROR', code: 'BLOCKED', status: 403 }, { logit });
+      // }
 
       // check user role
       if ((self && req.params[self] !== user.id) || !self) {

@@ -1,33 +1,22 @@
-import {
-  Table,
-  Column,
-  DataType,
-  Unique,
-  AllowNull,
-  Default,
-  Scopes,
-  DefaultScope,
-} from 'sequelize-typescript';
+import { Table, Column, DataType, Unique, AllowNull, Default, Scopes, DefaultScope } from 'sequelize-typescript';
 import bcrypt from 'bcrypt';
 
 import { BaseModel, IBaseModel } from '..';
-import {
-  PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY,
-} from './UserUtils';
+import { PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY } from './UserUtils';
 import defaultScope, { UserScopes } from './UserScopes';
 
 export interface IUserModel extends IBaseModel {
-  username: string;
-  email: string;
+  username: string; // unique
+  email: string; // unique
   password: string;
-  pseudo: string;
-  avatarId?: string | null;
+  pseudo: string; // unique
   role: UserRole;
-  isVerified: boolean;
-  isBlocked: boolean;
-  blockedUntil?: Date | null;
-  isBanned: boolean;
-  isPrivate: boolean;
+  isPrivate: boolean; // default false
+
+  avatarId?: string | null; // default null
+
+  isVerified: boolean; // default false
+  verifiedAt?: Date | null; // default null
 }
 
 @Scopes(() => UserScopes)
@@ -70,37 +59,14 @@ export class UserModel extends BaseModel implements IUserModel {
 
   @Default(false)
   @Column({ type: DataType.BOOLEAN })
-  declare isBlocked: boolean;
-
-  @AllowNull(true)
-  @Default(null)
-  @Column({ type: DataType.DATE })
-  declare blockedUntil: Date | null;
-
-  @Default(false)
-  @Column({ type: DataType.BOOLEAN })
-  declare isBanned: boolean;
-
-  @Default(false)
-  @Column({ type: DataType.BOOLEAN })
   declare isPrivate: boolean;
 
   // methods
-  /**
-   * Check if user role is higher than the given role
-   * @param than
-   * @returns
-   */
   isRoleHigher(than: UserRole) {
     const role = this.getDataValue('role') as UserRole;
     return USER_ROLE_HIERARCHY[role] > USER_ROLE_HIERARCHY[than];
   }
 
-  /**
-   * Check if user role is higher or equal to the given role
-   * @param than
-   * @returns
-   */
   isRoleHigherOrEqual(than: UserRole) {
     const role = this.getDataValue('role') as UserRole;
     return USER_ROLE_HIERARCHY[role] >= USER_ROLE_HIERARCHY[than];

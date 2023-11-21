@@ -2,12 +2,12 @@ import { Sequelize } from 'sequelize-typescript';
 import dotenv from 'dotenv';
 
 // Get all models
-import { LogModel, UserModel } from './models/index';
+import { LogModel, UserModel, UserSanctionModel } from './models/index';
 
 dotenv.config(); // Load .env file
 
 // Add all models to Sequelize
-const models = [UserModel, LogModel];
+const models = [UserModel, LogModel, UserSanctionModel];
 
 // Create database connection
 export const database = new Sequelize({

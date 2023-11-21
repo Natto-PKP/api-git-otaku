@@ -9,12 +9,9 @@ export const UserGetAllQuerySchema = Joi.object({
     .valid(...UserRoles)
     .optional(),
   isVerified: Joi.boolean().optional(),
-  isBlocked: Joi.boolean().optional(),
-  isBanned: Joi.boolean().optional(),
   search: Joi.string().optional(),
-  page: Joi.number().integer().positive().optional(),
+  page: Joi.number().integer().positive().allow(0).optional(),
   limit: Joi.number().integer().positive().optional(),
-  offset: Joi.number().integer().positive().allow(0).optional(),
 });
 
 /**

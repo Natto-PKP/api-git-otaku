@@ -3,8 +3,10 @@ import type { BaseScope } from '../../middlewares/auth';
 
 export const UserScopes: { [key in BaseScope]: FindOptions } = {
   public: {
-    attributes: { exclude: ['password', 'email', 'isVerified', 'blockedUntil', 'isBlocked', 'isBanned', 'createdById', 'updatedById', 'updatedAt'] },
-    where: { isBanned: false, isBlocked: false, isPrivate: false },
+    attributes: {
+      exclude: ['password', 'email', 'isVerified', 'createdById', 'updatedById', 'updatedAt'],
+    },
+    where: { isPrivate: false },
   },
 
   internal: {
@@ -15,9 +17,7 @@ export const UserScopes: { [key in BaseScope]: FindOptions } = {
     attributes: { exclude: ['password', 'createdById', 'updatedById'] },
   },
 
-  system: {
-
-  },
+  system: {},
 };
 
 export type UserScope = keyof typeof UserScopes;

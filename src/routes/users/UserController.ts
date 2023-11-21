@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../../middlewares/auth';
-import PaginationService from '../../utils/PaginationUtil';
+import { PaginationService } from '../../utils/PaginationUtil';
 import { UserService } from './UserService';
 import BasicError from '../../errors/BasicError';
 import { UsernameRegex } from '../../models/User/UserUtils';

@@ -12,7 +12,6 @@ export const LogGetAllQuerySchema = Joi.object({
   code: Joi.string()
     .valid(...ErrorCodeNames)
     .optional(),
-  page: Joi.number().integer().positive().optional(),
+  page: Joi.number().integer().positive().allow(0).optional(),
   limit: Joi.number().integer().positive().optional(),
-  offset: Joi.number().integer().positive().allow(0).optional(),
 });

@@ -2,7 +2,6 @@ import { Op } from 'sequelize';
 import { UserModel, type IUserModel } from '../../models/User/UserModel';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
 import type { UserScope } from '../../models/User/UserScopes';
-import { USER_ROLE_HIERARCHY } from '../../models/User/UserUtils';
 
 // Types
 type IData = Partial<IUserModel>;
@@ -10,8 +9,6 @@ type IData = Partial<IUserModel>;
 interface GetAllQuery {
   role?: IData['role'] | null;
   isVerified?: IData['isVerified'] | null;
-  isBlocked?: IData['isBlocked'] | null;
-  isBanned?: IData['isBanned'] | null;
   search?: string | null;
 }
 
@@ -49,19 +46,13 @@ export class UserService {
    * @param options
    * @returns
    */
-  static async getAll(
-    pagination: IPaginationFrom,
-    query: GetAllQuery,
-    options?: GetAllOptions,
-  ) {
+  static async getAll(pagination: IPaginationFrom, query: GetAllQuery, options?: GetAllOptions) {
     const scope = options?.scope || 'public'; // get scope
 
     // build where clause
-    const where = { } as any;
+    const where = {} as { [key: string | symbol]: unknown };
     if (query.role) where.role = query.role;
     if (query.isVerified) where.isVerified = query.isVerified;
-    if (query.isBlocked) where.isBlocked = query.isBlocked;
-    if (query.isBanned) where.isBanned = query.isBanned;
 
     if (query.search) {
       where[Op.or] = [
@@ -83,7 +74,8 @@ export class UserService {
       limit: pagination.limit,
     };
 
-    if (options?.count) { // if count is true
+    if (options?.count) {
+      // if count is true
       const total = await UserModel.count({ where });
       result.totalPage = Math.ceil(total / pagination.limit);
       result.total = total;
@@ -161,9 +153,5 @@ export class UserService {
   static async updateOne(user: string | UserModel | IUserModel, data: IData) {
     if (typeof user === 'string') await UserModel.update(data, { where: { id: user } });
     else await UserModel.update(data, { where: { id: user.id } });
-  }
-
-  static getRoleHierarchy(role: keyof typeof USER_ROLE_HIERARCHY) {
-    return USER_ROLE_HIERARCHY[role];
   }
 }

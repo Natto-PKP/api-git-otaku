@@ -7,12 +7,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'ADMIN',
       isVerified: true,
-      isBlocked: false,
-      isBanned: false,
       search: 'search',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeUndefined();
@@ -32,12 +29,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'WRONG_ROLE',
       isVerified: true,
-      isBlocked: false,
-      isBanned: false,
       search: 'search',
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -49,46 +43,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'ADMIN',
       isVerified: 'wrong_isVerified',
-      isBlocked: false,
-      isBanned: false,
       search: 'search',
       page: 1,
       limit: 10,
-      offset: 0,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong isBlocked', async () => {
-    expect.assertions(1);
-
-    const { error } = UserGetAllQuerySchema.validate({
-      role: 'ADMIN',
-      isVerified: true,
-      isBlocked: 'wrong_isBlocked',
-      isBanned: false,
-      search: 'search',
-      page: 1,
-      limit: 10,
-      offset: 0,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong isBanned', async () => {
-    expect.assertions(1);
-
-    const { error } = UserGetAllQuerySchema.validate({
-      role: 'ADMIN',
-      isVerified: true,
-      isBlocked: false,
-      isBanned: 'wrong_isBanned',
-      search: 'search',
-      page: 1,
-      limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -100,12 +57,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'ADMIN',
       isVerified: true,
-      isBlocked: false,
-      isBanned: false,
       search: 1,
       page: 1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -117,12 +71,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'ADMIN',
       isVerified: true,
-      isBlocked: false,
-      isBanned: false,
       search: 'search',
       page: -1,
       limit: 10,
-      offset: 0,
     });
 
     expect(error).toBeDefined();
@@ -134,29 +85,9 @@ describe('UserGetAllQuerySchema', () => {
     const { error } = UserGetAllQuerySchema.validate({
       role: 'ADMIN',
       isVerified: true,
-      isBlocked: false,
-      isBanned: false,
       search: 'search',
       page: 1,
       limit: -1,
-      offset: 0,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong offset', async () => {
-    expect.assertions(1);
-
-    const { error } = UserGetAllQuerySchema.validate({
-      role: 'ADMIN',
-      isVerified: true,
-      isBlocked: false,
-      isBanned: false,
-      search: 'search',
-      page: 1,
-      limit: 10,
-      offset: -1,
     });
 
     expect(error).toBeDefined();
