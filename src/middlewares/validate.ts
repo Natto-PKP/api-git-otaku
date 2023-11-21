@@ -35,8 +35,9 @@ export const validate = (schema: SchemaOptions, props: Prop[] = ['body'], option
     const req = request as AuthRequest<false>; // get request
 
     // check if user is authenticated if required
-    if (authRequired && !req.user)
-      throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+    if (authRequired && !req.user) {
+      throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'No token' }, { logit: false });
+    }
 
     const schemas = Array.isArray(schema) ? schema : [schema]; // get schemas
 

@@ -5,7 +5,7 @@ const userSanctionData: Partial<IUserSanctionModel> = {
   userId: '1',
   reason: 'reason',
   type: 'BAN',
-  endDate: new Date(),
+  expireAt: new Date(),
   byUserId: null,
   askCancellation: false,
   cancellationReason: null,
@@ -51,12 +51,12 @@ describe('createOne', () => {
     }
   });
 
-  it('should not create a new user sanction with wrong endDate', async () => {
+  it('should not create a new user sanction with wrong expireAt', async () => {
     expect.assertions(1);
 
     const wrongUserSanctionData = {
       ...userSanctionData,
-      endDate: 'wrong' as unknown,
+      expireAt: 'wrong' as unknown,
     } as Partial<IUserSanctionModel>;
 
     try {

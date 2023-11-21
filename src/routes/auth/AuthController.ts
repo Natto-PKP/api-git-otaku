@@ -21,13 +21,21 @@ export class AuthController {
 
     // check password
     const isPasswordValid = await AuthService.comparePassword(password, user.password);
-    if (!isPasswordValid) throw new BasicError({ type: 'ERROR', code: 'INVALID_CREDENTIALS', status: 400 }, { logit: false });
+    if (!isPasswordValid) {
+      throw new BasicError({ type: 'ERROR', code: 'INVALID_CREDENTIALS', status: 400 }, { logit: false });
+    }
+
+    // check if user is banned
+    if (await user.isBanned()) {
+      throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit: false });
+    }
 
     // generate tokens
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const refreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    res.status(200) // send tokens
+    res
+      .status(200) // send tokens
       .cookie('refreshToken', refreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
       .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
       .send();
@@ -43,7 +51,12 @@ export class AuthController {
 
     // check if user already exists
     const user = await UserService.getOneByUsernameOrEmail(body.username, body.email, { scope: 'system' });
-    if (user) throw new BasicError({ type: 'ERROR', code: 'USER_ALREADY_EXISTS', status: 400 }, { logit: false });
+    if (user) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'USER_ALREADY_EXISTS', status: 400, message: 'User already exists' },
+        { logit: false },
+      );
+    }
 
     // create user
     const newUser = await UserService.createOne(body);
@@ -52,7 +65,8 @@ export class AuthController {
     const accessToken = await AuthService.generateJwtAccessToken(newUser);
     const refreshToken = await AuthService.generateJwtRefreshToken(newUser);
 
-    res.status(201) // send tokens
+    res
+      .status(201) // send tokens
       .cookie('refreshToken', refreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
       .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
       .send();
@@ -79,7 +93,8 @@ export class AuthController {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const newRefreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    res.status(200) // send tokens
+    res
+      .status(200) // send tokens
       .cookie('refreshToken', newRefreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
       .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
       .send();

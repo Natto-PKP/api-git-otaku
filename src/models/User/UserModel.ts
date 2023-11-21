@@ -1,9 +1,10 @@
 import { Table, Column, DataType, Unique, AllowNull, Default, Scopes, DefaultScope } from 'sequelize-typescript';
 import bcrypt from 'bcrypt';
 
-import { BaseModel, IBaseModel } from '..';
+import { BaseModel, IBaseModel, UserSanctionModel } from '..';
 import { PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY } from './UserUtils';
 import defaultScope, { UserScopes } from './UserScopes';
+import { Op } from 'sequelize';
 
 export interface IUserModel extends IBaseModel {
   username: string; // unique
@@ -82,5 +83,21 @@ export class UserModel extends BaseModel implements IUserModel {
 
   isOwner() {
     return this.role === 'OWNER';
+  }
+
+  async isBanned() {
+    const count = await UserSanctionModel.count({
+      where: { userId: this.id, isFinished: false, type: { [Op.in]: ['TEMP_BAN', 'BAN'] } },
+    });
+
+    return count > 0;
+  }
+
+  async isWarned() {
+    const count = await UserSanctionModel.count({
+      where: { userId: this.id, isFinished: false, type: { [Op.in]: ['WARN'] } },
+    });
+
+    return count > 0;
   }
 }

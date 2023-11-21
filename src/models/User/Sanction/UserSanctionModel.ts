@@ -19,7 +19,7 @@ export interface IUserSanctionModel extends IBaseModel {
   userId: string; // sanctioned user
   reason: string; // reason of the sanction
   type: UserSanctionType; // type of the sanction
-  endDate?: Date | null; // null if permanent
+  expireAt?: Date | null; // null if permanent
   byUserId?: string | null; // user who sanctioned
 
   askCancellation: boolean; // if the user asked for the cancellation
@@ -31,6 +31,9 @@ export interface IUserSanctionModel extends IBaseModel {
   cancelledAt?: Date | null; // date of the cancellation
   cancelledByUserId?: string | null; // user who cancelled
   cancelledReason?: string | null; // reason of the cancellation
+
+  isFinished: boolean; // if the sanction is finished
+  finishedAt?: Date | null; // date of the end of the sanction
 }
 
 @Scopes(() => UserSanctionScopes)
@@ -51,7 +54,7 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @AllowNull(true)
   @Default(null)
   @Column({ type: DataType.DATE })
-  declare endDate: Date | null;
+  declare expireAt: Date | null;
 
   @AllowNull(true)
   @Default(null)
@@ -103,6 +106,23 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Default(null)
   @Column({ type: DataType.DATE })
   declare askCancellationAt: Date | null;
+
+  @Default(false)
+  @Column({
+    type: DataType.BOOLEAN,
+    set(this: UserSanctionModel, value: boolean) {
+      if (value === true) this.setDataValue('finishedAt', new Date());
+      else this.setDataValue('finishedAt', null);
+
+      this.setDataValue('isFinished', value);
+    },
+  })
+  declare isFinished: boolean;
+
+  @AllowNull(true)
+  @Default(null)
+  @Column({ type: DataType.DATE })
+  declare finishedAt: Date | null;
 
   @BelongsTo(() => UserModel, 'userId')
   declare user: UserSanctionModel;

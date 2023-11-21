@@ -17,5 +17,9 @@ export const UserSanctionCreateOneSchema = Joi.object({
   type: Joi.string()
     .valid(...UserSanctionTypes)
     .required(),
-  endDate: Joi.date().allow(null),
+  expireAt: Joi.alternatives().conditional('type', {
+    is: 'TEMP_BAN',
+    then: Joi.date().required(),
+    otherwise: Joi.date().forbidden(),
+  }),
 });

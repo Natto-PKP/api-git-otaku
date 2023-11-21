@@ -37,7 +37,12 @@ export class LogController {
     } = req;
 
     const data = await LogService.getOne(logId, { scope });
-    if (!data) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+    if (!data) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'Log not found' },
+        { logit: false },
+      );
+    }
 
     res.status(200).json(data);
   }

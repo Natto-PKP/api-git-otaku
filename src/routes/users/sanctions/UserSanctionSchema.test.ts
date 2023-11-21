@@ -57,7 +57,6 @@ describe('UserSanctionCreateOneSchema', () => {
       userId: uuid(),
       reason: 'reason',
       type: 'BAN',
-      endDate: new Date().getTime(),
     };
 
     const { error } = UserSanctionCreateOneSchema.validate(data);
@@ -72,7 +71,6 @@ describe('UserSanctionCreateOneSchema', () => {
       userId: 'wrong',
       reason: 'reason',
       type: 'wrong',
-      endDate: 'wrong',
     };
 
     const { error } = UserSanctionCreateOneSchema.validate(data);

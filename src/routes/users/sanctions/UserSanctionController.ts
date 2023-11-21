@@ -27,11 +27,12 @@ export class UserSanctionController {
 
     const data = await UserSanctionService.getOne(sanctionId, { scope });
 
-    if (!data)
+    if (!data) {
       throw new BasicError(
         { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'Sanction not found' },
         { logit: false },
       );
+    }
 
     res.status(200).json(data);
   }
@@ -41,25 +42,37 @@ export class UserSanctionController {
     const { body } = req;
 
     const user = await UserService.getOne(body.userId);
-    if (!user)
+    if (!user) {
       throw new BasicError(
         { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
         { logit: false },
       );
+    }
 
     // can't sanction someone with higher role or same role
-    if (user.isAdminOrHigher())
+    if (user.isAdminOrHigher()) {
       throw new BasicError(
         { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: "You can't sanction this user" },
         { logit: false },
       );
+    }
 
     // can't sanction yourself
-    if (user.id === req.user.id)
+    if (user.id === req.user.id) {
       throw new BasicError(
         { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: "You can't sanction yourself" },
         { logit: false },
       );
+    }
+
+    // can't sanction someone who is already banned
+    const isAlreadyBanned = await user.isBanned();
+    if (isAlreadyBanned) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: 'This user is already banned' },
+        { logit: false },
+      );
+    }
 
     const data = await UserSanctionService.createOne({ ...body, byUserId: req.user.id });
 
@@ -74,7 +87,12 @@ export class UserSanctionController {
 
     const sanction = await UserSanctionService.getOne(sanctionId);
 
-    if (!sanction) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+    if (!sanction) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'Sanction not found' },
+        { logit: false },
+      );
+    }
 
     await UserSanctionService.cancelOne(sanction, req.body);
 

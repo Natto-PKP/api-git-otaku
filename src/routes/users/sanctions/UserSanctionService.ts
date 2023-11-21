@@ -1,6 +1,7 @@
 import { UserSanctionModel, IUserSanctionModel } from '../../../models';
 import { UserSanctionScope } from '../../../models/User/Sanction/UserSanctionScopes';
 import { IPaginationFrom } from '../../../utils/PaginationUtil';
+import { Op } from 'sequelize';
 
 type IData = Partial<IUserSanctionModel>;
 
@@ -77,11 +78,27 @@ export class UserSanctionService {
 
   static async cancelOne(
     sanction: string | UserSanctionModel | IUserSanctionModel,
-    data: Pick<IData, 'cancelledReason' | 'cancelledByUserId'>
+    data: Pick<IData, 'cancelledReason' | 'cancelledByUserId'>,
   ) {
     const d = { ...data, isCancelled: true, cantCancel: true } as IData;
 
     if (typeof sanction === 'string') await UserSanctionModel.update(d, { where: { id: sanction } });
     else await UserSanctionModel.update(d, { where: { id: sanction.id } });
+  }
+
+  static async finishOne(sanction: string | UserSanctionModel | IUserSanctionModel) {
+    const d = { isFinished: true, cantCancel: true } as IData;
+
+    if (typeof sanction === 'string') await UserSanctionModel.update(d, { where: { id: sanction } });
+    else await UserSanctionModel.update(d, { where: { id: sanction.id } });
+  }
+
+  static async finishAllWhoExpired() {
+    const now = new Date();
+
+    await UserSanctionModel.update(
+      { isFinished: true, cantCancel: true },
+      { where: { isFinished: false, expireAt: { [Op.lte]: now } } },
+    );
   }
 }

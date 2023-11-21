@@ -46,7 +46,12 @@ export class UserController {
       data = await UserService.getOneByUsername(identifier, { scope });
     } else data = await UserService.getOne(identifier, { scope }); // get user by id
 
-    if (!data) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+    if (!data) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
+        { logit: false },
+      );
+    }
 
     res.status(200).json(data);
   }
@@ -61,7 +66,12 @@ export class UserController {
     const { userId } = req.params;
 
     const user = await UserService.getOne(userId);
-    if (!user) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+    if (!user) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
+        { logit: false },
+      );
+    }
 
     await UserService.deleteOne(user);
 
@@ -78,7 +88,12 @@ export class UserController {
     const { userId } = req.params;
 
     const user = await UserService.getOne(userId);
-    if (!user) throw new BasicError({ type: 'ERROR', code: 'NOT_FOUND', status: 404 }, { logit: false });
+    if (!user) {
+      throw new BasicError(
+        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
+        { logit: false },
+      );
+    }
 
     await UserService.updateOne(user, req.body);
 

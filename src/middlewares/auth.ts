@@ -3,7 +3,6 @@ import BasicError from '../errors/BasicError';
 import type { UserModel } from '../models/User/UserModel';
 import { UserService } from '../routes/users/UserService';
 import { AuthService } from '../routes/auth/AuthService';
-// import type { UserRole } from '../models/User/UserUtils';
 
 // Types
 interface AuthOptions {
@@ -16,13 +15,7 @@ interface AuthOptions {
    * If true, the middleware will ignore banned users
    * @default false
    */
-  ignoreBannedUser?: boolean | null;
-
-  /**
-   * If true, the middleware will ignore blocked users
-   * @default false
-   */
-  ignoreBlockedUser?: boolean | null;
+  ignoreScanctionedUser?: boolean | null;
 
   /**
    * If true, the middleware will throw an error if the user is not authenticated
@@ -72,8 +65,7 @@ export interface AuthRequest<R extends boolean = true> extends Request {
 export default (options?: AuthOptions) => {
   const required = options?.required ?? true;
   const logit = options?.logit ?? false;
-  // const ignoreBannedUser = options?.ignoreBannedUser ?? false;
-  // const ignoreBlockedUser = options?.ignoreBlockedUser ?? false;
+  const ignoreScanctionedUser = options?.ignoreScanctionedUser ?? false;
   const adminOnly = options?.adminOnly ?? false;
   const helperOnly = options?.helperOnly ?? false;
   const self = options?.self ?? null;
@@ -82,43 +74,50 @@ export default (options?: AuthOptions) => {
     try {
       // get token from header
       const { accessToken } = req.cookies;
-      if (!accessToken) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+      if (!accessToken) {
+        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'No token' }, { logit });
+      }
 
       // verify token
       const decoded = await AuthService.verifyJwtAccessToken(accessToken, logit);
-      if (!decoded) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+      if (!decoded) {
+        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'Invalid token' }, { logit });
+      }
 
       // check token validity
-      if (!decoded.id || !decoded.exp)
-        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
-      if (Date.now() / 1000 >= decoded.exp)
-        throw new BasicError({ type: 'ERROR', code: 'TOKEN_EXPIRED', status: 401 }, { logit });
+      if (!decoded.id || !decoded.exp) {
+        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'Invalid token' }, { logit });
+      }
+
+      if (Date.now() / 1000 >= decoded.exp) {
+        throw new BasicError(
+          { type: 'ERROR', code: 'TOKEN_EXPIRED', status: 401, message: 'Token expired' },
+          { logit },
+        );
+      }
 
       // check user validity
       const user = await UserService.getOne(decoded.id);
-      if (!user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+      if (!user) {
+        throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'Invalid token' }, { logit });
+      }
 
       // check if user is banned
-      // if (user.isBanned && !ignoreBannedUser)
-      //   throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit });
-
-      // // check if user is blocked
-      // if (user.isBlocked) {
-      //   const blockedUntil = user.blockedUntil?.getTime() || null;
-      //   if (!blockedUntil) UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
-      //   else if (Date.now() >= blockedUntil) {
-      //     await UserService.updateOne(user, { isBlocked: false, blockedUntil: null });
-      //   } else if (!ignoreBlockedUser) throw new BasicError({ type: 'ERROR', code: 'BLOCKED', status: 403 }, { logit });
-      // }
+      if (!ignoreScanctionedUser && (await user.isBanned())) {
+        throw new BasicError(
+          { type: 'ERROR', code: 'UNAUTHORIZED', status: 401, message: 'You are banned' },
+          { logit },
+        );
+      }
 
       // check user role
       if ((self && req.params[self] !== user.id) || !self) {
-        if (adminOnly && !user.isAdminOrHigher())
+        if (adminOnly && !user.isAdminOrHigher()) {
           throw new BasicError(
             { type: 'ERROR', code: 'MISSING_PERMISSION', status: 403, message: 'Only admins can access this resource' },
-            { logit }
+            { logit },
           );
-        else if (helperOnly && !user.isHelperOrHigher())
+        } else if (helperOnly && !user.isHelperOrHigher()) {
           throw new BasicError(
             {
               type: 'ERROR',
@@ -126,8 +125,9 @@ export default (options?: AuthOptions) => {
               status: 403,
               message: 'Only helpers can access this resource',
             },
-            { logit }
+            { logit },
           );
+        }
       }
 
       // auth request
