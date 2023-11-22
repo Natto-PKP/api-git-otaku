@@ -6,6 +6,7 @@ import { UserController } from './UserController';
 import auth from '../../middlewares/auth';
 import { UserValidation } from './UserValidation';
 import { UserSanctionRouter } from './sanctions/UserSanctionRouter';
+import { UserScopes } from '../../models/User/UserScopes';
 
 export const UserRouter = Router();
 
@@ -19,8 +20,8 @@ UserRouter.use('/:userId/sanctions', UserSanctionRouter);
  */
 UserRouter.get(
   '/',
-  handler(auth({ required: false })), // auth middleware, but not required
-  validate(UserGetAllQuerySchema, ['body', 'query'], { authRequired: false }), // validate query
+  handler(auth({ required: false, scopes: UserScopes })), // auth middleware, but not required
+  validate(UserGetAllQuerySchema, ['body', 'query'], { allowPagination: true, allowScope: true }), // validate query
   handler(UserController.getAll), // handle request
 );
 
@@ -35,7 +36,16 @@ UserRouter.get(
  */
 UserRouter.get(
   '/:identifier',
-  handler(auth({ required: false })), // can't use @me if not logged in
+  handler(
+    auth({
+      required: false,
+      allowSelf: true,
+      allowMeParam: true,
+      allowUserIdentifierParam: true,
+      scopes: UserScopes,
+    }),
+  ), // can't use @me if not logged in
+  validate(null, ['body', 'query'], { allowScope: true }), // validate params
   handler(UserController.getOne),
 );
 
@@ -46,7 +56,7 @@ UserRouter.get(
  * @param {string} userId.param.required - The user id
  * @returns {IUserModel} 201 - The created user info
  */
-UserRouter.delete('/:userId', handler(auth({ adminOnly: true, self: 'userId' })), handler(UserController.deleteOne));
+UserRouter.delete('/:userId', handler(auth({ allowOnlySelf: true })), handler(UserController.deleteOne));
 
 /**
  * Create a new user
@@ -59,7 +69,7 @@ UserRouter.delete('/:userId', handler(auth({ adminOnly: true, self: 'userId' }))
  */
 UserRouter.patch(
   '/:userId',
-  handler(auth({ adminOnly: true, self: 'userId' })),
+  handler(auth({ allowOnlyAdminOrHigher: true, allowOnlySelf: true })),
   handler(UserValidation.updateOne),
   handler(UserController.updateOne),
 );

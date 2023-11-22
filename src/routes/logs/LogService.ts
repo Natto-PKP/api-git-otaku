@@ -1,6 +1,6 @@
 import { LogModel, type ILogModel } from '../../models/Log/LogModel';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
-import type { LogScope } from '../../models/Log/LogScopes';
+import { Scope } from '../../utils/ScopeUtil';
 
 // Types
 type IData = Partial<ILogModel>;
@@ -12,7 +12,7 @@ interface GetAllQuery {
 }
 
 interface Options {
-  scope?: LogScope | null;
+  scope?: Scope | null;
 }
 
 interface GetAllOptions extends Options {

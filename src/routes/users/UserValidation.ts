@@ -11,17 +11,20 @@ export class UserValidation {
     let schema = UserSelfUpdateBodySchema; // get schema for self
 
     // check if user is admin or higher
-    if (user.isAdminOrHigher()) { 
-      schema = UserAdminUpdateBodySchema; // get schema for admin 
+    if (user.isAdminOrHigher()) {
+      schema = UserAdminUpdateBodySchema; // get schema for admin
 
       // if user is trying to add a role upper or equal than his current one
       if (req.body.role && user.isRoleHigherOrEqual(req.body.role)) {
-        throw new BasicError({
-          type: 'ERROR',
-          code: 'MISSING_PERMISSION',
-          status: 403,
-          message: "Can't add a role upper or equal than your current one",
-        }, { logit: false });
+        throw new BasicError(
+          {
+            type: 'ERROR',
+            code: 'MISSING_PERMISSION',
+            status: 403,
+            message: "Can't add a role upper or equal than your current one",
+          },
+          { logit: false },
+        );
       }
     }
 

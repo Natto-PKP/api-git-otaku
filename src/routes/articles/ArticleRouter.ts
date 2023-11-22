@@ -3,29 +3,24 @@ import { handler } from '../../helpers/handler';
 import { validate } from '../../middlewares/validate';
 import { ArticleGetAllQuerySchema } from './ArticleSchema';
 import auth from '../../middlewares/auth';
+import { ArticleScopes } from '../../models/Article/ArticleScopes';
 
-export const ArticleRouter = Router(); 
+export const ArticleRouter = Router();
 
 ArticleRouter.get(
   '/',
-  handler(auth({ required: false, ignoreBannedUser: true, ignoreBlockedUser: true })),
-  validate(ArticleGetAllQuerySchema, ['body', 'query']),
+  handler(auth({ required: false, ignoreScanctionedUser: true, scopes: ArticleScopes })),
+  validate(ArticleGetAllQuerySchema, ['body', 'query'], { allowPagination: true, allowScope: true }),
 );
 
-ArticleRouter.post(
-  '/',
-  handler(auth()),
-);
+ArticleRouter.post('/', handler(auth()));
 
 ArticleRouter.get(
-  '/:id',
-  handler(auth({ required: false, ignoreBannedUser: true, ignoreBlockedUser: true })),
+  '/:articleId',
+  handler(auth({ required: false, ignoreScanctionedUser: true, scopes: ArticleScopes })),
+  validate(null, ['body', 'query'], { allowScope: true }),
 );
 
-ArticleRouter.patch(
-  '/:id',
-);
+ArticleRouter.patch('/:articleId');
 
-ArticleRouter.delete(
-  '/:id',
-);
+ArticleRouter.delete('/:articleId');

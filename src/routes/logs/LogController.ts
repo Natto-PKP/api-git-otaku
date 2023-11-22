@@ -17,7 +17,7 @@ export class LogController {
     const req = request as AuthRequest;
     const params = { ...req.query, ...req.body };
     const pagination = PaginationService.from(params);
-    const { scope } = req;
+    const scope = req.scope || null;
 
     const data = await LogService.getAll(pagination, params, { count: true, scope });
 
@@ -31,10 +31,8 @@ export class LogController {
    */
   static async getOne(request: Request, res: Response) {
     const req = request as AuthRequest;
-    const {
-      scope,
-      params: { logId },
-    } = req;
+    const { logId } = req.params;
+    const scope = req.scope || null;
 
     const data = await LogService.getOne(logId, { scope });
     if (!data) {

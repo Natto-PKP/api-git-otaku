@@ -4,7 +4,7 @@ import { ErrorCodeNames, ErrorTypes } from '../../errors/BaseError';
 /**
  * Log get all query schema
  */
-export const LogGetAllQuerySchema = Joi.object({
+export const LogGetAllQuerySchema = Joi.object().keys({
   type: Joi.string()
     .valid(...ErrorTypes)
     .optional(),
@@ -12,6 +12,4 @@ export const LogGetAllQuerySchema = Joi.object({
   code: Joi.string()
     .valid(...ErrorCodeNames)
     .optional(),
-  page: Joi.number().integer().positive().allow(0).optional(),
-  limit: Joi.number().integer().positive().optional(),
 });

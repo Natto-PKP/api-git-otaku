@@ -5,6 +5,7 @@ import { LogController } from './LogController';
 import auth from '../../middlewares/auth';
 import { validate } from '../../middlewares/validate';
 import { LogGetAllQuerySchema } from './LogSchema';
+import { LogScopes } from '../../models/Log/LogScopes';
 
 export const LogRouter = Router();
 
@@ -16,9 +17,9 @@ export const LogRouter = Router();
  */
 LogRouter.get(
   '/',
-  handler(auth({ adminOnly: true })), // you need to be admin or helper to get logs
-  validate(LogGetAllQuerySchema, ['body', 'query']),
-  handler(LogController.getAll)
+  handler(auth({ allowOnlyAdminOrHigher: true, scopes: LogScopes })), // you need to be admin or helper to get logs
+  validate(LogGetAllQuerySchema, ['body', 'query'], { allowPagination: true, allowScope: true }),
+  handler(LogController.getAll),
 );
 
 /**
@@ -30,8 +31,9 @@ LogRouter.get(
  */
 LogRouter.get(
   '/:logId',
-  handler(auth({ adminOnly: true })), // you need to be admin or helper to get a log
-  handler(LogController.getOne)
+  handler(auth({ allowOnlyAdminOrHigher: true, scopes: LogScopes })), // you need to be admin or helper to get a log
+  validate(null, ['body', 'query'], { allowScope: true }),
+  handler(LogController.getOne),
 );
 
 /**
@@ -42,6 +44,6 @@ LogRouter.get(
  */
 LogRouter.delete(
   '/:logId',
-  handler(auth({ adminOnly: true })), // you need to be admin to delete a log
-  handler(LogController.deleteOne)
+  handler(auth({ allowOnlyAdminOrHigher: true })), // you need to be admin to delete a log
+  handler(LogController.deleteOne),
 );

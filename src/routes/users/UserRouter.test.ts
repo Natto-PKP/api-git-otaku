@@ -144,7 +144,7 @@ describe('GET /users/:identifier', () => {
 });
 
 describe('DELETE /users/:userId', () => {
-  it('should delete a user with admin', async () => {
+  it('should not delete a user with admin', async () => {
     expect.assertions(1);
 
     const user = await UserModel.create(userData);
@@ -162,7 +162,7 @@ describe('DELETE /users/:userId', () => {
     await user.destroy();
     await admin.destroy();
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(403);
   });
 
   it('should not delete a user with helper', async () => {
@@ -240,7 +240,7 @@ describe('DELETE /users/:userId', () => {
 
     await user.destroy();
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(403);
   });
 });
 

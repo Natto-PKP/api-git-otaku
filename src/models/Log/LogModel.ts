@@ -1,15 +1,8 @@
-import {
-  Table,
-  Column,
-  DataType,
-  AllowNull,
-  Scopes,
-  DefaultScope,
-} from 'sequelize-typescript';
+import { Table, Column, DataType, AllowNull, Scopes, DefaultScope } from 'sequelize-typescript';
 
 import { BaseModel, IBaseModel } from '..';
 import type { ErrorCode, ErrorType } from '../../errors/BaseError';
-import defaultScope, { LogScopes } from './LogScopes';
+import { LogScopes } from './LogScopes';
 import type { ObjectType } from './LogUtils';
 
 export interface ILogModel extends IBaseModel {
@@ -26,8 +19,8 @@ export interface ILogModel extends IBaseModel {
   headers?: ObjectType | null;
 }
 
-@Scopes(() => LogScopes)
-@DefaultScope(() => defaultScope)
+@Scopes(() => LogScopes.scopes())
+@DefaultScope(() => LogScopes.default())
 @Table({ tableName: 'log' })
 export class LogModel extends BaseModel implements ILogModel {
   @Column({ type: DataType.STRING })

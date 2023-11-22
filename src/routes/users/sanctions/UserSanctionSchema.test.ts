@@ -10,8 +10,6 @@ describe('UserSanctionGetAllQuerySchema', () => {
       askCancellation: true,
       isCancelled: false,
       byUserId: uuid(),
-      page: 1,
-      limit: 10,
     };
 
     const { error } = UserSanctionGetAllQuerySchema.validate(data);
@@ -28,8 +26,6 @@ describe('UserSanctionGetAllQuerySchema', () => {
       askCancellation: 'wrong',
       isCancelled: 'wrong',
       byUserId: 'wrong',
-      page: 'wrong',
-      limit: 'wrong',
     };
 
     const { error } = UserSanctionGetAllQuerySchema.validate(data);

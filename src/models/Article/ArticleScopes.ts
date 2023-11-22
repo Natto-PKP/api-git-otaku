@@ -1,26 +1,26 @@
-import { Op, type FindOptions } from 'sequelize';
-import type { BaseScope } from '../../middlewares/auth';
+import { Op } from 'sequelize';
+import { ScopeUtil, Scopes } from '../../utils/ScopeUtil';
 
-export const ArticleScopes: { [key in BaseScope]: FindOptions } = {
+export const config: Scopes = {
   public: {
-    attributes: { exclude: ['updatedById', 'createdById'] },
-    where: { systemStatus: 'PUBLISHED' },
+    options: {
+      attributes: { exclude: ['updatedById', 'createdById'] },
+      where: { systemStatus: 'PUBLISHED' },
+    },
   },
 
   internal: {
-    attributes: { exclude: ['updatedById', 'createdById'] },
-    where: { systemStatus: { [Op.in]: ['PUBLISHED', 'DRAFT', 'SUGGESTED'] } },
+    options: {
+      attributes: { exclude: ['updatedById', 'createdById'] },
+      where: { systemStatus: { [Op.in]: ['PUBLISHED', 'DRAFT', 'SUGGESTED'] } },
+    },
   },
 
   private: {
-    attributes: { exclude: ['updatedById', 'createdById'] },
-  },
-
-  system: {
-
+    options: {
+      attributes: { exclude: ['updatedById', 'createdById'] },
+    },
   },
 };
 
-export type ArticleScope = keyof typeof ArticleScopes;
-
-export default ArticleScopes.public;
+export const ArticleScopes = new ScopeUtil(config);

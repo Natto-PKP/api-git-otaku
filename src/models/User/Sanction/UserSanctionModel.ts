@@ -13,7 +13,7 @@ import {
 
 import { BaseModel, IBaseModel, UserModel } from '../..';
 import { UserSanctionType, UserSanctionTypes } from './UserSanctionUtils';
-import defaultScope, { UserSanctionScopes } from './UserSanctionScopes';
+import { UserSanctionScopes } from './UserSanctionScopes';
 
 export interface IUserSanctionModel extends IBaseModel {
   userId: string; // sanctioned user
@@ -36,8 +36,8 @@ export interface IUserSanctionModel extends IBaseModel {
   finishedAt?: Date | null; // date of the end of the sanction
 }
 
-@Scopes(() => UserSanctionScopes)
-@DefaultScope(() => defaultScope)
+@Scopes(() => UserSanctionScopes.scopes())
+@DefaultScope(() => UserSanctionScopes.default())
 @Table({ tableName: 'user_sanction' })
 export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Unique

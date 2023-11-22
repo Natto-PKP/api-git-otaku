@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { UserModel, type IUserModel } from '../../models/User/UserModel';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
-import type { UserScope } from '../../models/User/UserScopes';
+import { Scope } from '../../utils/ScopeUtil';
 
 // Types
 type IData = Partial<IUserModel>;
@@ -16,7 +16,7 @@ interface Options {
   /**
    * @default UserDefaultScopeName 'public'
    */
-  scope?: UserScope | null;
+  scope?: Scope | null;
 }
 
 interface GetAllOptions extends Options {

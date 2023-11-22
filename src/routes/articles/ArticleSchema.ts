@@ -4,7 +4,7 @@ import { ArticleStatuses, ArticleTypes, ArticleVisibilities } from '../../models
 /**
  * Article get all query schema
  */
-export const ArticleGetAllQuerySchema = Joi.object({
+export const ArticleGetAllQuerySchema = Joi.object().keys({
   type: Joi.string()
     .valid(...ArticleTypes)
     .optional(),
@@ -15,8 +15,6 @@ export const ArticleGetAllQuerySchema = Joi.object({
     .valid(...ArticleVisibilities)
     .optional(),
   search: Joi.string().optional(),
-  page: Joi.number().integer().positive().allow(0).optional(),
-  limit: Joi.number().integer().positive().optional(),
 });
 
 const Body = {
@@ -84,31 +82,39 @@ const CreateBody = {
 /**
  * Article   create body schema
  */
-export const ArticleCreateBodySchema = Joi.object({
-  ...CreateBody,
-  visibility: Joi.forbidden(),
-}).required();
+export const ArticleCreateBodySchema = Joi.object()
+  .keys({
+    ...CreateBody,
+    visibility: Joi.forbidden(),
+  })
+  .required();
 
 /**
  * Article helper create body schema
  */
-export const ArticleHelperCreateBodySchema = Joi.object({
-  ...CreateBody,
-  visibility: Joi.string().valid('DRAFT', 'PUBLISHED').optional(),
-}).required();
+export const ArticleHelperCreateBodySchema = Joi.object()
+  .keys({
+    ...CreateBody,
+    visibility: Joi.string().valid('DRAFT', 'PUBLISHED').optional(),
+  })
+  .required();
 
 /**
  * Article update body schema
  */
-export const ArticleUpdateBodySchema = Joi.object({
-  ...Body,
-  visibility: Joi.forbidden(),
-}).required();
+export const ArticleUpdateBodySchema = Joi.object()
+  .keys({
+    ...Body,
+    visibility: Joi.forbidden(),
+  })
+  .required();
 
 /**
  * Article helper update body schema
  */
-export const ArticleHelperUpdateBodySchema = Joi.object({
-  ...Body,
-  visibility: Joi.string().valid('DRAFT', 'PUBLISHED').optional(),
-}).required();
+export const ArticleHelperUpdateBodySchema = Joi.object()
+  .keys({
+    ...Body,
+    visibility: Joi.string().valid('DRAFT', 'PUBLISHED').optional(),
+  })
+  .required();

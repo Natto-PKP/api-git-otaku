@@ -1,3 +1,5 @@
+import Joi from 'joi';
+
 // Magic numbers
 export const MIN_LIMIT = 0;
 export const MAX_LIMIT = 200;
@@ -6,6 +8,11 @@ export const DEFAULT_LIMIT = 100;
 // Types
 export type IPagination = { page: number; limit: number };
 export type IPaginationFrom = { offset: number; limit: number; page: number };
+
+export const PaginationSchemaData = {
+  page: Joi.number().integer().positive().allow(0),
+  limit: Joi.number().integer().positive(),
+};
 
 /**
  * Pagination service

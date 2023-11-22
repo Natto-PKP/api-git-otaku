@@ -14,11 +14,7 @@ export const AuthRouter = Router();
  * @returns {IAuthResponse} 200 - The auth response
  * @returns {Error} 400 - Bad request
  */
-AuthRouter.post(
-  '/login',
-  validate(LoginSchema, ['body', 'query'], { authRequired: false }),
-  handler(AuthController.login),
-);
+AuthRouter.post('/login', validate(LoginSchema, ['body', 'query']), handler(AuthController.login));
 
 /**
  * Register
@@ -27,11 +23,7 @@ AuthRouter.post(
  * @returns {IAuthResponse} 201 - The auth response
  * @returns {Error} 400 - Bad request
  */
-AuthRouter.post(
-  '/register',
-  validate(RegisterSchema, ['body', 'query'], { authRequired: false }),
-  handler(AuthController.register),
-);
+AuthRouter.post('/register', validate(RegisterSchema, ['body', 'query']), handler(AuthController.register));
 
 /**
  * Refresh
@@ -40,10 +32,7 @@ AuthRouter.post(
  * @returns {IAuthResponse} 200 - The auth response
  * @returns {Error} 400 - Bad request
  */
-AuthRouter.post(
-  '/refresh',
-  handler(AuthController.refresh),
-);
+AuthRouter.post('/refresh', handler(AuthController.refresh));
 
 /**
  * Logout
@@ -51,7 +40,4 @@ AuthRouter.post(
  * @group Auth - Operations about auth
  * @returns {void} 204 - No content
  */
-AuthRouter.delete(
-  '/logout',
-  handler(AuthController.logout),
-);
+AuthRouter.delete('/logout', handler(AuthController.logout));

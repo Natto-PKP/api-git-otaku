@@ -8,8 +8,6 @@ describe('UserGetAllQuerySchema', () => {
       role: 'ADMIN',
       isVerified: true,
       search: 'search',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeUndefined();
@@ -30,8 +28,6 @@ describe('UserGetAllQuerySchema', () => {
       role: 'WRONG_ROLE',
       isVerified: true,
       search: 'search',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeDefined();
@@ -44,8 +40,6 @@ describe('UserGetAllQuerySchema', () => {
       role: 'ADMIN',
       isVerified: 'wrong_isVerified',
       search: 'search',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeDefined();
@@ -58,36 +52,6 @@ describe('UserGetAllQuerySchema', () => {
       role: 'ADMIN',
       isVerified: true,
       search: 1,
-      page: 1,
-      limit: 10,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong page', async () => {
-    expect.assertions(1);
-
-    const { error } = UserGetAllQuerySchema.validate({
-      role: 'ADMIN',
-      isVerified: true,
-      search: 'search',
-      page: -1,
-      limit: 10,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong limit', async () => {
-    expect.assertions(1);
-
-    const { error } = UserGetAllQuerySchema.validate({
-      role: 'ADMIN',
-      isVerified: true,
-      search: 'search',
-      page: 1,
-      limit: -1,
     });
 
     expect(error).toBeDefined();

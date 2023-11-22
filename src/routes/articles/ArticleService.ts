@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { ArticleModel, type IArticleModel } from '../../models/Article/ArticleModel';
-import type { ArticleScope } from '../../models/Article/ArticleScopes';
 import type { IPaginationFrom } from '../../utils/PaginationUtil';
+import { Scope } from '../../utils/ScopeUtil';
 
 type IData = Partial<IArticleModel>;
 
@@ -16,7 +16,7 @@ interface Options {
   /**
    * @default UserDefaultScopeName 'public'
    */
-  scope?: ArticleScope | null;
+  scope?: Scope | null;
 }
 
 interface GetAllOptions extends Options {
@@ -47,7 +47,7 @@ export class ArticleService {
     const scope = options?.scope || 'public'; // get scope
 
     // build where clause
-    const where = {} as any;
+    const where = {} as { [key: string | symbol]: unknown };
     if (query.type) where.type = query.type;
     if (query.visibility) where.systemStatus = query.visibility;
     if (query.status) where.status = query.status;

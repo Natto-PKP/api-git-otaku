@@ -1,7 +1,7 @@
 import { UserSanctionModel, IUserSanctionModel } from '../../../models';
-import { UserSanctionScope } from '../../../models/User/Sanction/UserSanctionScopes';
 import { IPaginationFrom } from '../../../utils/PaginationUtil';
 import { Op } from 'sequelize';
+import { Scope } from '../../../utils/ScopeUtil';
 
 type IData = Partial<IUserSanctionModel>;
 
@@ -14,7 +14,7 @@ interface GetAllQuery {
 }
 
 interface Options {
-  scope?: UserSanctionScope | null;
+  scope?: Scope | null;
 }
 
 interface GetAllOptions extends Options {

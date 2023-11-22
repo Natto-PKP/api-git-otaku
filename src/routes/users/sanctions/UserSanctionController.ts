@@ -10,7 +10,7 @@ export class UserSanctionController {
     const req = request as AuthRequest;
     const params = { ...req.query, ...req.body };
     const pagination = PaginationService.from(params);
-    const scope = req.scope;
+    const scope = req.scope || null;
 
     const data = await UserSanctionService.getAll(
       pagination,
@@ -23,11 +23,8 @@ export class UserSanctionController {
 
   static async getOne(request: Request, res: Response) {
     const req = request as AuthRequest;
-    const scope = req.scope;
-
-    const {
-      params: { sanctionId, userId },
-    } = req;
+    const scope = req.scope || null;
+    const { sanctionId, userId } = req.params;
 
     const data = await UserSanctionService.getOneByUserId(sanctionId, userId, { scope });
 

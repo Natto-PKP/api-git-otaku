@@ -32,17 +32,12 @@ export class UserController {
    */
   static async getOne(request: Request, res: Response) {
     const req = request as AuthRequest<false>;
-    const {
-      params: { identifier },
-    } = req;
-
-    // get scope
-    const scope = req.user && (identifier === req.user.id || identifier === '@me') ? 'private' : req.scope || null;
+    const { identifier } = req.params;
+    const scope = req.scope || null;
 
     let data = null;
     if (identifier === '@me' && req.user) data = await UserService.getOne(req.user.id, { scope }); // get current user
     else if (UsernameRegex.test(identifier)) {
-      // get user by username
       data = await UserService.getOneByUsername(identifier, { scope });
     } else data = await UserService.getOne(identifier, { scope }); // get user by id
 

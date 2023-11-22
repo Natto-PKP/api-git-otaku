@@ -1,20 +1,13 @@
-import type { FindOptions } from 'sequelize';
-import type { BaseScope } from '../../../middlewares/auth';
+import { ScopeUtil, Scopes } from '../../../utils/ScopeUtil';
 
-export const UserSanctionScopes: { [key in BaseScope]: FindOptions } = {
+export const config: Scopes = {
   public: {
-    attributes: { exclude: ['byUserId', 'cancelledByUserId'] },
+    options: { attributes: { exclude: ['byUserId', 'cancelledByUserId'] } },
   },
-
-  internal: {},
 
   private: {
-    attributes: { exclude: ['byUserId', 'cancelledByUserId'] },
+    options: { attributes: { exclude: ['byUserId', 'cancelledByUserId'] } },
   },
-
-  system: {},
 };
 
-export type UserSanctionScope = keyof typeof UserSanctionScopes;
-
-export default UserSanctionScopes.public;
+export const UserSanctionScopes = new ScopeUtil(config);

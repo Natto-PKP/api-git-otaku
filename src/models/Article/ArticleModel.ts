@@ -1,4 +1,15 @@
-import { Table, Column, DataType, Unique, AllowNull, Default, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  DataType,
+  Unique,
+  AllowNull,
+  Default,
+  ForeignKey,
+  BelongsTo,
+  Scopes,
+  DefaultScope,
+} from 'sequelize-typescript';
 
 import { BaseModel, IBaseModel } from '../BaseModel';
 import { IdentifierService } from '../../utils/IdentifierUtil';
@@ -10,6 +21,7 @@ import {
   ArticleVisibilities,
   ArticleStatuses,
 } from './ArticleUtils';
+import { ArticleScopes } from './ArticleScopes';
 
 export interface IArticleModel extends IBaseModel {
   identifier: string;
@@ -55,6 +67,8 @@ export interface IArticleModel extends IBaseModel {
   // contributors: string[];
 }
 
+@Scopes(() => ArticleScopes.scopes())
+@DefaultScope(() => ArticleScopes.default())
 @Table({ tableName: 'article' })
 export class ArticleModel extends BaseModel {
   @Unique

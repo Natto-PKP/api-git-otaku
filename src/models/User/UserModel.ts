@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 
 import { BaseModel, IBaseModel, UserSanctionModel } from '..';
 import { PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY } from './UserUtils';
-import defaultScope, { UserScopes } from './UserScopes';
+import { UserScopes } from './UserScopes';
 import { Op } from 'sequelize';
 
 export interface IUserModel extends IBaseModel {
@@ -20,8 +20,8 @@ export interface IUserModel extends IBaseModel {
   verifiedAt?: Date | null; // default null
 }
 
-@Scopes(() => UserScopes)
-@DefaultScope(() => defaultScope)
+@Scopes(() => UserScopes.scopes())
+@DefaultScope(() => UserScopes.default())
 @Table({ tableName: 'user' })
 export class UserModel extends BaseModel implements IUserModel {
   @Unique

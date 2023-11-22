@@ -1,24 +1,17 @@
-import type { FindOptions } from 'sequelize';
-import type { BaseScope } from '../../middlewares/auth';
+import { ScopeUtil, Scopes } from '../../utils/ScopeUtil';
 
-export const LogScopes: { [key in BaseScope]: FindOptions } = {
+const config: Scopes = {
   public: {
-    attributes: { exclude: ['stack', 'headers'] },
+    options: {
+      attributes: { exclude: ['stack', 'headers'] },
+    },
   },
 
   internal: {
-    attributes: { exclude: ['stack', 'headers'] },
-  },
-
-  private: {
-
-  },
-
-  system: {
-
+    options: {
+      attributes: { exclude: ['stack', 'headers'] },
+    },
   },
 };
 
-export type LogScope = keyof typeof LogScopes;
-
-export default LogScopes.public;
+export const LogScopes = new ScopeUtil(config);

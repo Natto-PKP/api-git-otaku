@@ -8,8 +8,6 @@ describe('LogGetAllQuerySchema', () => {
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeUndefined();
@@ -30,8 +28,6 @@ describe('LogGetAllQuerySchema', () => {
       type: 'WRONG_TYPE',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeDefined();
@@ -44,8 +40,6 @@ describe('LogGetAllQuerySchema', () => {
       type: 'ERROR',
       status: -1,
       code: 'INTERNAL_SERVER_ERROR',
-      page: 1,
-      limit: 10,
     });
 
     expect(error).toBeDefined();
@@ -58,36 +52,6 @@ describe('LogGetAllQuerySchema', () => {
       type: 'ERROR',
       status: 500,
       code: 'WRONG_CODE',
-      page: 1,
-      limit: 10,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong page', async () => {
-    expect.assertions(1);
-
-    const { error } = LogGetAllQuerySchema.validate({
-      type: 'ERROR',
-      status: 500,
-      code: 'INTERNAL_SERVER_ERROR',
-      page: -1,
-      limit: 10,
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a query with wrong limit', async () => {
-    expect.assertions(1);
-
-    const { error } = LogGetAllQuerySchema.validate({
-      type: 'ERROR',
-      status: 500,
-      code: 'INTERNAL_SERVER_ERROR',
-      page: 1,
-      limit: -1,
     });
 
     expect(error).toBeDefined();

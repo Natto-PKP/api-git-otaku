@@ -18,6 +18,13 @@ const userAdminData = {
   pseudo: 'Super admin',
   role: 'ADMIN',
 };
+const userHelperData = {
+  email: 'helper@domain.com',
+  username: 'helper',
+  password: '!lOv2ferret',
+  pseudo: 'Super helper',
+  role: 'HELPER',
+};
 
 const userSanctionData: Partial<IUserSanctionModel> = {
   reason: 'reason',
@@ -90,7 +97,7 @@ describe('GET /users/:userId/sanctions', () => {
     await user.destroy();
   });
 
-  it('should not get all user sanctions with non admin user', async () => {
+  it('should get all current user sanctions with authenticated user', async () => {
     expect.assertions(1);
 
     const user = await UserModel.create(userData);
@@ -99,6 +106,22 @@ describe('GET /users/:userId/sanctions', () => {
     const cookies = [`accessToken=${accessToken}`];
 
     const response = await request.get(`/users/${user.id}/sanctions`).set('Cookie', cookies);
+
+    expect(response.status).toBe(200);
+
+    await user.destroy();
+  });
+
+  it('should not get all user sanctions with non admin user', async () => {
+    expect.assertions(1);
+
+    const user = await UserModel.create(userData);
+    const user2 = await UserModel.create(userHelperData);
+
+    const accessToken = await AuthService.generateJwtAccessToken(user);
+    const cookies = [`accessToken=${accessToken}`];
+
+    const response = await request.get(`/users/${user2.id}/sanctions`).set('Cookie', cookies);
 
     expect(response.status).toBe(403);
 

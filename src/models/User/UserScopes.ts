@@ -1,25 +1,28 @@
-import type { FindOptions } from 'sequelize';
-import type { BaseScope } from '../../middlewares/auth';
+import { ScopeUtil, type Scopes } from '../../utils/ScopeUtil';
 
-export const UserScopes: { [key in BaseScope]: FindOptions } = {
+const config: Scopes = {
   public: {
-    attributes: {
-      exclude: ['password', 'email', 'isVerified', 'createdById', 'updatedById', 'updatedAt'],
+    options: {
+      attributes: {
+        exclude: ['password', 'email', 'isVerified', 'createdById', 'updatedById', 'updatedAt'],
+      },
+      where: { isPrivate: false },
     },
-    where: { isPrivate: false },
   },
 
   internal: {
-    attributes: { exclude: ['password', 'createdById', 'updatedById'] },
+    options: {
+      attributes: { exclude: ['password'] },
+    },
+    roles: ['ADMIN'],
   },
 
   private: {
-    attributes: { exclude: ['password', 'createdById', 'updatedById'] },
+    options: {
+      attributes: { exclude: ['password', 'createdById', 'updatedById'] },
+    },
+    self: true,
   },
-
-  system: {},
 };
 
-export type UserScope = keyof typeof UserScopes;
-
-export default UserScopes.public;
+export const UserScopes = new ScopeUtil(config);
