@@ -5,8 +5,13 @@ export const config: Scopes = {
     options: { attributes: { exclude: ['byUserId', 'cancelledByUserId'] } },
   },
 
+  internal: {
+    roles: ['ADMIN', 'OWNER'],
+  },
+
   private: {
     options: { attributes: { exclude: ['byUserId', 'cancelledByUserId'] } },
+    self: true,
   },
 };
 

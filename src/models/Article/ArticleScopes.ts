@@ -1,4 +1,3 @@
-import { Op } from 'sequelize';
 import { ScopeUtil, Scopes } from '../../utils/ScopeUtil';
 
 export const config: Scopes = {
@@ -12,14 +11,8 @@ export const config: Scopes = {
   internal: {
     options: {
       attributes: { exclude: ['updatedById', 'createdById'] },
-      where: { systemStatus: { [Op.in]: ['PUBLISHED', 'DRAFT', 'SUGGESTED'] } },
     },
-  },
-
-  private: {
-    options: {
-      attributes: { exclude: ['updatedById', 'createdById'] },
-    },
+    roles: ['ADMIN', 'OWNER', 'HELPER'],
   },
 };
 

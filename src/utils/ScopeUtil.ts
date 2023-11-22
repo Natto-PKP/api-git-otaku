@@ -11,7 +11,7 @@ export const ScopeSchemaData = {
 };
 
 interface ScopeOptions {
-  options: ScopesOptions;
+  options?: ScopesOptions;
   self?: boolean | null;
   roles?: UserRole[] | null;
 }
@@ -49,10 +49,11 @@ export class ScopeUtil {
   }
 
   verify(scope: Scope = 'public', options?: VerifyOptions) {
+    if (!Scopes.includes(scope) || scope === 'system') return false;
     if (scope === 'public') return true;
-    if (scope === 'system') return false;
 
     const s = this.config[scope];
+    if (!s) return true; // If scope is not defined, it is public
     if (options?.role && s?.roles && s.roles.includes(options.role)) return true;
     if (options?.self && s?.self) return true;
     return false;

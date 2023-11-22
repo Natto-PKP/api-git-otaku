@@ -124,8 +124,12 @@ export default (options?: AuthOptions) => {
 
       next();
     } catch (error) {
-      if (required) next(error);
-      else next();
+      if (!required) {
+        const scope = req.params[scopeParamName] as Scope;
+        if (scope) req.params[scopeParamName] = 'public';
+
+        next();
+      } else next(error);
     }
   };
 
