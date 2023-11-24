@@ -1,27 +1,50 @@
 import { Sequelize } from 'sequelize-typescript';
-import dotenv from 'dotenv';
+import { environment } from './config';
 
-// Get all models
-import { LogModel, UserModel, UserSanctionModel } from './models/index';
+import { ApiLogModel, UserModel, UserSanctionCommentModel, UserSanctionModel } from './models/index';
 
-dotenv.config(); // Load .env file
-
-// Add all models to Sequelize
-const models = [UserModel, LogModel, UserSanctionModel];
-
-// Create database connection
-export const database = new Sequelize({
-  username: process.env.PG_USER,
-  password: process.env.PG_PASSWORD,
-  database: process.env.PG_DATABASE,
+// Create connection
+const connection = new Sequelize({
+  username: environment.database.username,
+  password: environment.database.password,
+  database: environment.database.database,
   dialect: 'postgres',
 
   define: { underscored: true },
   logging: false,
 
-  models,
+  models: [UserModel, ApiLogModel, UserSanctionModel, UserSanctionCommentModel],
 });
 
-// database.sync({ force: true }); // Create tables
-// database.sync({ alter: true }); // Update tables
-// database.drop({ cascade: true }); // Drop tables
+export class Database {
+  static connection = connection;
+
+  static async connect() {
+    await connection.authenticate();
+  }
+
+  static async disconnect() {
+    await connection.close();
+  }
+
+  static async reset() {
+    await Database.drop();
+    await Database.create();
+  }
+
+  static async sync() {
+    await connection.sync({ alter: true });
+  }
+
+  static async drop() {
+    await connection.drop({ cascade: true });
+  }
+
+  static async create() {
+    await connection.sync({ force: true });
+  }
+
+  static async truncate() {
+    await connection.truncate({ cascade: true, restartIdentity: true });
+  }
+}

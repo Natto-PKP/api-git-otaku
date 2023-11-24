@@ -1,37 +1,52 @@
-import type { NextFunction, Request, Response } from 'express';
-import type { AuthRequest } from '../../middlewares/auth';
-import BasicError from '../../errors/BasicError';
-import { UserAdminUpdateBodySchema, UserSelfUpdateBodySchema } from './UserSchema';
+import { NextFunction, Request, Response } from 'express';
+import { AuthRequest } from '../../middlewares/auth';
+import { UserService } from './UserService';
+import { ForbiddenError, NotFoundError, PermissionError } from '../../errors/BasicError';
 
 export class UserValidation {
-  static updateOne(req: Request, _res: Response, next: NextFunction) {
-    const { user } = req as AuthRequest<true>;
-    if (!user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+  static async getAllQueryParams(request: Request, _res: Response, next: NextFunction) {
+    const req = request as AuthRequest<false>;
+    const user = req.user;
 
-    let schema = UserSelfUpdateBodySchema; // get schema for self
+    const params = { ...req.query, ...req.body };
 
-    // check if user is admin or higher
-    if (user.isAdminOrHigher()) {
-      schema = UserAdminUpdateBodySchema; // get schema for admin
+    if ('role' in params && !user?.hasPermissions('user.manage.role'))
+      throw PermissionError("you can't filter by role", { logit: false });
 
-      // if user is trying to add a role upper or equal than his current one
-      if (req.body.role && user.isRoleHigherOrEqual(req.body.role)) {
-        throw new BasicError(
-          {
-            type: 'ERROR',
-            code: 'MISSING_PERMISSION',
-            status: 403,
-            message: "Can't add a role upper or equal than your current one",
-          },
-          { logit: false },
-        );
-      }
+    if ('isVerified' in params && !user?.hasPermissions('user.manage.verified'))
+      throw PermissionError("you can't filter by verified", { logit: false });
+
+    next();
+  }
+
+  static async updateOneBodyParams(request: Request, _res: Response, next: NextFunction) {
+    const req = request as AuthRequest;
+    const user = req.user;
+    const target = await UserService.getOne(req.params.userId);
+
+    if (!target) throw NotFoundError('user not found', { logit: false });
+
+    const { role, email, password, isPrivate } = req.body;
+
+    if (user.id !== target.id) {
+      if (!user.hasPermissions('user.manage'))
+        throw PermissionError('you can only update your own user', { logit: false });
+      if ('isPrivate' in req.body && isPrivate !== target.isPrivate)
+        throw ForbiddenError("you can't change this user's privacy", { logit: false });
+      if ('email' in req.body && email !== target.email)
+        throw ForbiddenError("you can't change this user's email", { logit: false });
+      if ('password' in req.body && password !== target.password)
+        throw ForbiddenError("you can't change this user's password", { logit: false });
     }
 
-    // validate body
-    const { error } = schema.validate(req.body);
-    if (error) throw error;
+    if ('role' in req.body && role !== target.role) {
+      if (!user.hasPermissions('user.manage.role'))
+        throw PermissionError("you can't change users role", { logit: false });
+      if (user.id === target.id) throw ForbiddenError("you can't change your own role", { logit: false });
+      if (user.isRoleHigherOrEqual(role))
+        throw ForbiddenError("you can't add a role upper or equal than your current one", { logit: false });
+    }
 
-    return next();
+    next();
   }
 }

@@ -10,19 +10,15 @@ export const LoginSchema = Joi.object()
     username: Joi.string().regex(UsernameRegex),
     password: Joi.string().regex(PasswordRegex).required(),
   })
-  .length(2)
-  .xor('email', 'username')
-  .required();
+  .xor('email', 'username');
 
 /**
  * Auth register schema
  */
-export const RegisterSchema = Joi.object()
-  .keys({
-    email: Joi.string().email().required(),
-    username: Joi.string().regex(UsernameRegex).required(),
-    password: Joi.string().regex(PasswordRegex).required(),
-    pseudo: Joi.string().regex(PseudoRegex).required(),
-    isPrivate: Joi.boolean().optional(),
-  })
-  .required();
+export const RegisterSchema = Joi.object().keys({
+  email: Joi.string().email().required(),
+  username: Joi.string().regex(UsernameRegex).required(),
+  password: Joi.string().regex(PasswordRegex).required(),
+  pseudo: Joi.string().regex(PseudoRegex).required(),
+  isPrivate: Joi.boolean().optional(),
+});

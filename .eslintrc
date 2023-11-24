@@ -20,7 +20,7 @@
       }
     },
     {
-      "files": ["src/**/*.test.ts"],
+      "files": ["src/**/*.test.ts", "jest.setup.js"],
       "env": { "node": true, "jest": true },
       "plugins": ["@typescript-eslint", "eslint-plugin-jest"],
       "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],

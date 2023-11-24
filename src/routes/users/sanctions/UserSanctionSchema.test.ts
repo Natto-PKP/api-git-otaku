@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { UserSanctionGetAllQuerySchema, UserSanctionCreateOneSchema } from './UserSanctionSchema';
 
 describe('UserSanctionGetAllQuerySchema', () => {
@@ -9,7 +8,6 @@ describe('UserSanctionGetAllQuerySchema', () => {
       type: 'BAN',
       askCancellation: true,
       isCancelled: false,
-      byUserId: uuid(),
     };
 
     const { error } = UserSanctionGetAllQuerySchema.validate(data);
@@ -21,11 +19,9 @@ describe('UserSanctionGetAllQuerySchema', () => {
     expect.assertions(1);
 
     const data = {
-      userId: 'wrong',
       type: 'wrong',
       askCancellation: 'wrong',
       isCancelled: 'wrong',
-      byUserId: 'wrong',
     };
 
     const { error } = UserSanctionGetAllQuerySchema.validate(data);
@@ -49,7 +45,6 @@ describe('UserSanctionCreateOneSchema', () => {
     expect.assertions(1);
 
     const data = {
-      userId: uuid(),
       reason: 'reason',
       type: 'BAN',
     };
@@ -63,7 +58,6 @@ describe('UserSanctionCreateOneSchema', () => {
     expect.assertions(1);
 
     const data = {
-      userId: 'wrong',
       reason: 'reason',
       type: 'wrong',
     };
@@ -73,7 +67,7 @@ describe('UserSanctionCreateOneSchema', () => {
     expect(error).toBeDefined();
   });
 
-  it('should validate with missing data', async () => {
+  it('should not validate with missing data', async () => {
     expect.assertions(1);
 
     const data = {};

@@ -1,11 +1,11 @@
 import { Table, Column, DataType, AllowNull, Scopes, DefaultScope } from 'sequelize-typescript';
 
-import { BaseModel, IBaseModel } from '..';
-import type { ErrorCode, ErrorType } from '../../errors/BaseError';
-import { LogScopes } from './LogScopes';
-import type { ObjectType } from './LogUtils';
+import { BaseModel, IBaseModel } from '../..';
+import type { ErrorCode, ErrorType } from '../../../errors/BaseError';
+import { ApiLogScopes } from './ApiLogScopes';
+import type { ObjectType } from './ApiLogUtils';
 
-export interface ILogModel extends IBaseModel {
+export interface IApiLogModel extends IBaseModel {
   type: ErrorType;
   status: number;
   code: ErrorCode;
@@ -19,19 +19,23 @@ export interface ILogModel extends IBaseModel {
   headers?: ObjectType | null;
 }
 
-@Scopes(() => LogScopes.scopes())
-@DefaultScope(() => LogScopes.default())
-@Table({ tableName: 'log' })
-export class LogModel extends BaseModel implements ILogModel {
+@Scopes(() => ApiLogScopes.scopes())
+@DefaultScope(() => ApiLogScopes.default())
+@Table({ tableName: 'api_log' })
+export class ApiLogModel extends BaseModel implements IApiLogModel {
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   declare type: ErrorType;
 
+  @AllowNull(false)
   @Column({ type: DataType.INTEGER })
   declare status: number;
 
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   declare code: ErrorCode;
 
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   declare message: string;
 

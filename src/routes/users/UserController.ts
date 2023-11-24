@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import type { AuthRequest } from '../../middlewares/auth';
 import { PaginationService } from '../../utils/PaginationUtil';
 import { UserService } from './UserService';
-import BasicError from '../../errors/BasicError';
+import { NotFoundError } from '../../errors/BasicError';
 import { UsernameRegex } from '../../models/User/UserUtils';
 
 /**
@@ -41,12 +41,7 @@ export class UserController {
       data = await UserService.getOneByUsername(identifier, { scope });
     } else data = await UserService.getOne(identifier, { scope }); // get user by id
 
-    if (!data) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
-        { logit: false },
-      );
-    }
+    if (!data) throw NotFoundError('user not found', { logit: false });
 
     res.status(200).json(data);
   }
@@ -61,12 +56,7 @@ export class UserController {
     const { userId } = req.params;
 
     const user = await UserService.getOne(userId);
-    if (!user) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
-        { logit: false },
-      );
-    }
+    if (!user) throw NotFoundError('user not found', { logit: false });
 
     await UserService.deleteOne(user);
 
@@ -80,17 +70,8 @@ export class UserController {
    */
   static async updateOne(request: Request, res: Response) {
     const req = request as AuthRequest;
-    const { userId } = req.params;
 
-    const user = await UserService.getOne(userId);
-    if (!user) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
-        { logit: false },
-      );
-    }
-
-    await UserService.updateOne(user, req.body);
+    await UserService.updateOne(req.params.userId, req.body);
 
     res.status(200).send();
   }

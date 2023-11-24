@@ -1,20 +1,30 @@
 import { Table, Column, DataType, Unique, AllowNull, Default, Scopes, DefaultScope } from 'sequelize-typescript';
 import bcrypt from 'bcrypt';
 
-import { BaseModel, IBaseModel, UserSanctionModel } from '..';
-import { PseudoRegex, UsernameRegex, UserRoles, type UserRole, USER_ROLE_HIERARCHY } from './UserUtils';
+import { BaseModel, IBaseModel } from '..';
+import {
+  PseudoRegex,
+  UserPermission,
+  UserPermissionManager,
+  UserRole,
+  UserRoleList,
+  UserRoles,
+  UsernameRegex,
+} from './UserUtils';
 import { UserScopes } from './UserScopes';
-import { Op } from 'sequelize';
 
 export interface IUserModel extends IBaseModel {
   username: string; // unique
   email: string; // unique
   password: string;
-  pseudo: string; // unique
-  role: UserRole;
-  isPrivate: boolean; // default false
+  pseudo: string;
 
-  avatarId?: string | null; // default null
+  role: UserRole; // default 'USER'
+
+  // avatarId?: string | null; // default null
+  // bannerId?: string | null; // default null
+
+  isPrivate: boolean; // default false
 
   isVerified: boolean; // default false
   verifiedAt?: Date | null; // default null
@@ -25,13 +35,16 @@ export interface IUserModel extends IBaseModel {
 @Table({ tableName: 'user' })
 export class UserModel extends BaseModel implements IUserModel {
   @Unique
+  @AllowNull(false)
   @Column({ type: DataType.STRING, validate: { is: UsernameRegex } })
   declare username: string;
 
   @Unique
+  @AllowNull(false)
   @Column({ type: DataType.STRING, validate: { isEmail: true } })
   declare email: string;
 
+  @AllowNull(false)
   @Column({
     type: DataType.STRING,
     set(this: UserModel, value: string) {
@@ -41,63 +54,62 @@ export class UserModel extends BaseModel implements IUserModel {
   })
   declare password: string;
 
-  @Unique
+  @AllowNull(false)
   @Column({ type: DataType.STRING, validate: { is: PseudoRegex } })
   declare pseudo: string;
 
-  @AllowNull(true)
-  @Default(null)
-  @Column({ type: DataType.STRING })
-  declare avatarId: string | null;
-
+  @AllowNull(false)
   @Default('USER')
-  @Column({ type: DataType.ENUM(...UserRoles) })
+  @Column({ type: DataType.ENUM(...UserRoleList) })
   declare role: UserRole;
 
-  @Default(false)
-  @Column({ type: DataType.BOOLEAN })
-  declare isVerified: boolean;
+  @Column({ type: DataType.VIRTUAL })
+  get permissions() {
+    return UserPermissionManager.resolve(UserRoles[this.role]);
+  }
 
+  // @AllowNull(true)
+  // @Default(null)
+  // @Column({ type: DataType.STRING })
+  // declare avatarId: string | null;
+
+  // @AllowNull(true)
+  // @Default(null)
+  // @Column({ type: DataType.STRING })
+  // declare bannerId: string | null;
+
+  @AllowNull(false)
   @Default(false)
   @Column({ type: DataType.BOOLEAN })
   declare isPrivate: boolean;
 
+  @AllowNull(false)
+  @Default(false)
+  @Column({ type: DataType.BOOLEAN })
+  declare isVerified: boolean;
+
+  @AllowNull(true)
+  @Default(null)
+  @Column({ type: DataType.DATE })
+  declare verifiedAt: Date | null;
+
   // methods
-  isRoleHigher(than: UserRole) {
-    const role = this.getDataValue('role') as UserRole;
-    return USER_ROLE_HIERARCHY[role] > USER_ROLE_HIERARCHY[than];
+  hasPermissions(permissions: UserPermission | UserPermission[]) {
+    const current = UserRoles[this.role];
+    return UserPermissionManager.has(current, permissions);
   }
 
-  isRoleHigherOrEqual(than: UserRole) {
-    const role = this.getDataValue('role') as UserRole;
-    return USER_ROLE_HIERARCHY[role] >= USER_ROLE_HIERARCHY[than];
+  isRoleHigherOrEqual(role: UserRole) {
+    const currentPosition = UserRoleList.indexOf(this.role);
+    const targetPosition = UserRoleList.indexOf(role);
+
+    return currentPosition >= targetPosition;
   }
 
-  isAdminOrHigher() {
-    return this.isRoleHigherOrEqual('ADMIN');
-  }
+  isRoleLowerOrEqual(role: UserRole) {
+    const currentPosition = UserRoleList.indexOf(this.role);
+    const targetPosition = UserRoleList.indexOf(role);
 
-  isHelperOrHigher() {
-    return this.isRoleHigherOrEqual('HELPER');
-  }
-
-  isOwner() {
-    return this.role === 'OWNER';
-  }
-
-  async isBanned() {
-    const count = await UserSanctionModel.count({
-      where: { userId: this.id, isFinished: false, type: { [Op.in]: ['TEMP_BAN', 'BAN'] } },
-    });
-
-    return count > 0;
-  }
-
-  async isWarned() {
-    const count = await UserSanctionModel.count({
-      where: { userId: this.id, isFinished: false, type: { [Op.in]: ['WARN'] } },
-    });
-
-    return count > 0;
+    return currentPosition <= targetPosition;
   }
 }

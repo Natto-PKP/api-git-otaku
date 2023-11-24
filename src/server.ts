@@ -1,7 +1,8 @@
 import Express from 'express';
 import { router } from './routes/router';
+import './config'; // Load environment variables
 
-import './database'; // Connect to database
+import './database';
 import './cronjobs'; // Start cronjobs
 
 // Create Express server

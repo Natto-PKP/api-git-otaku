@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import type { UserModel } from '../../models/User/UserModel';
-import BasicError from '../../errors/BasicError';
+import { AuthenticationError } from '../../errors/BasicError';
 
 // Types
 export interface Payload {
@@ -53,7 +53,7 @@ export class AuthService {
    */
   static async verifyJwtAccessToken(accessToken: string, logit = false) {
     const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!);
-    if (!decoded) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+    if (!decoded) throw AuthenticationError('you are not authenticated', { logit });
     return decoded as Payload;
   }
 
@@ -65,7 +65,7 @@ export class AuthService {
    */
   static async verifyJwtRefreshToken(refreshToken: string, logit = false) {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!);
-    if (!decoded) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit });
+    if (!decoded) throw AuthenticationError('you are not authenticated', { logit });
     return decoded as Payload;
   }
 

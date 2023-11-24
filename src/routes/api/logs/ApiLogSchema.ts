@@ -1,10 +1,10 @@
 import Joi from 'joi';
-import { ErrorCodeNames, ErrorTypes } from '../../errors/BaseError';
+import { ErrorCodeNames, ErrorTypes } from '../../../errors/BaseError';
 
 /**
- * Log get all query schema
+ * ApiLog get all query schema
  */
-export const LogGetAllQuerySchema = Joi.object().keys({
+export const ApiLogGetAllQuerySchema = Joi.object().keys({
   type: Joi.string()
     .valid(...ErrorTypes)
     .optional(),

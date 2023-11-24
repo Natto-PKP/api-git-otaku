@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import type { AuthRequest } from '../../../middlewares/auth';
 import { PaginationService } from '../../../utils/PaginationUtil';
-import BasicError from '../../../errors/BasicError';
+import { ForbiddenError, NotFoundError } from '../../../errors/BasicError';
 import { UserSanctionService } from './UserSanctionService';
 import { UserService } from '../UserService';
 
@@ -28,54 +28,29 @@ export class UserSanctionController {
 
     const data = await UserSanctionService.getOneByUserId(sanctionId, userId, { scope });
 
-    if (!data) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'Sanction not found' },
-        { logit: false },
-      );
-    }
+    if (!data) throw NotFoundError('sanction not found', { logit: false });
 
     res.status(200).json(data);
   }
 
   static async createOne(request: Request, res: Response) {
     const req = request as AuthRequest;
-    const { body } = req;
+    const { body, user } = req;
 
-    const user = await UserService.getOne(body.userId);
-    if (!user) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'User not found' },
-        { logit: false },
-      );
-    }
+    const target = await UserService.getOne(req.params.userId);
+    if (!target) throw NotFoundError('user not found', { logit: false });
 
-    // can't sanction someone with higher role or same role
-    if (user.isAdminOrHigher()) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: "You can't sanction this user" },
-        { logit: false },
-      );
-    }
+    // can't sanction someone with a higher role than you
+    if (target.isRoleHigherOrEqual(user.role)) throw ForbiddenError("you can't sanction this user", { logit: false });
 
     // can't sanction yourself
-    if (user.id === req.user.id) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: "You can't sanction yourself" },
-        { logit: false },
-      );
-    }
+    if (target.id === user.id) throw ForbiddenError("you can't sanction yourself", { logit: false });
 
     // can't sanction someone who is already banned
-    const isAlreadyBanned = await user.isBanned();
-    if (isAlreadyBanned) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'FORBIDDEN', status: 403, message: 'This user is already banned' },
-        { logit: false },
-      );
-    }
+    const isAlreadyBanned = await UserSanctionService.isAlreadySanctioned(target.id, ['BAN', 'TEMP_BAN']);
+    if (isAlreadyBanned) throw ForbiddenError('this user is already banned', { logit: false });
 
-    const data = await UserSanctionService.createOne({ ...body, byUserId: req.user.id });
+    const data = await UserSanctionService.createOne({ ...body, userId: target.id, byUserId: user.id });
 
     res.status(201).json(data);
   }
@@ -88,14 +63,31 @@ export class UserSanctionController {
 
     const sanction = await UserSanctionService.getOneByUserId(sanctionId, userId);
 
-    if (!sanction) {
-      throw new BasicError(
-        { type: 'ERROR', code: 'NOT_FOUND', status: 404, message: 'Sanction not found' },
-        { logit: false },
-      );
-    }
-
+    if (!sanction) throw NotFoundError('sanction not found', { logit: false });
     await UserSanctionService.cancelOne(sanction, req.body);
+
+    res.status(204).end();
+  }
+
+  static async deleteOne(request: Request, res: Response) {
+    const req = request as AuthRequest;
+    const {
+      params: { sanctionId, userId },
+    } = req;
+
+    const sanction = await UserSanctionService.getOneByUserId(sanctionId, userId);
+
+    if (!sanction) throw NotFoundError('sanction not found', { logit: false });
+    await UserSanctionService.deleteOne(sanction);
+
+    res.status(204).end();
+  }
+
+  static async clear(request: Request, res: Response) {
+    const req = request as AuthRequest;
+    const { userId } = req.params;
+
+    await UserSanctionService.clear(userId);
 
     res.status(204).end();
   }

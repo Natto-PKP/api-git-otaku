@@ -117,18 +117,6 @@ describe('getAll', () => {
 
     expect(users.data).toBeDefined();
   });
-
-  it('should get all users with authenticated user', async () => {
-    expect.assertions(1);
-
-    const user = await UserModel.create(userData);
-
-    const users = await UserService.getAll({ page: 1, limit: 10, offset: 0 }, {}, { scope: 'private' });
-
-    expect(users.data).toBeDefined();
-
-    await user.destroy();
-  });
 });
 
 describe('getOne', () => {

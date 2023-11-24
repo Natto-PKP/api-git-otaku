@@ -7,7 +7,6 @@ import { Scope } from '../../utils/ScopeUtil';
 type IData = Partial<IUserModel>;
 
 interface GetAllQuery {
-  role?: IData['role'] | null;
   isVerified?: IData['isVerified'] | null;
   search?: string | null;
 }
@@ -51,7 +50,6 @@ export class UserService {
 
     // build where clause
     const where = {} as { [key: string | symbol]: unknown };
-    if (query.role) where.role = query.role;
     if (query.isVerified) where.isVerified = query.isVerified;
 
     if (query.search) {

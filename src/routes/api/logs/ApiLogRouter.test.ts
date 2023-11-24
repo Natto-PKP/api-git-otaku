@@ -1,8 +1,8 @@
 import supertest from 'supertest';
 
-import { LogModel, UserModel } from '../../models';
-import { server } from '../../server';
-import { AuthService } from '../auth/AuthService';
+import { ApiLogModel, UserModel } from '../../../models';
+import { server } from '../../../server';
+import { AuthService } from '../../auth/AuthService';
 
 const userData = {
   email: 'user@domain.com',
@@ -27,31 +27,39 @@ const userAdminData = {
   role: 'ADMIN',
 };
 
+const userSuperAdminData = {
+  email: 'superadmin@domain.com',
+  username: 'super_admin',
+  password: '!lOv2ferret',
+  pseudo: 'Super super admin',
+  role: 'SUPER_ADMIN',
+};
+
 const logData = {
   type: 'INFO',
   status: 200,
-  code: 'A_LOG',
+  code: 'INTERNAL_SERVER_ERROR',
   message: 'This is a log',
 };
 
 const request = supertest(server);
 
-describe('GET /logs', () => {
+describe('GET /api/logs', () => {
   it('should get all logs when the user is an admin', async () => {
     expect.assertions(3);
 
-    const user = await UserModel.create(userAdminData);
-    const accessToken = await AuthService.generateJwtAccessToken(user);
-    const refreshToken = await AuthService.generateJwtRefreshToken(user);
+    const superAdmin = await UserModel.create(userSuperAdminData);
+    const accessToken = await AuthService.generateJwtAccessToken(superAdmin);
+    const refreshToken = await AuthService.generateJwtRefreshToken(superAdmin);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    const response = await request.get('/logs').set('Cookie', cookies);
+    const response = await request.get('/api/logs').set('Cookie', cookies);
 
-    await user.destroy();
+    await superAdmin.destroy();
 
     expect(response.status).toBe(200);
     expect(response.body).toBeDefined();
@@ -70,7 +78,7 @@ describe('GET /logs', () => {
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    const response = await request.get('/logs').set('Cookie', cookies);
+    const response = await request.get('/api/logs').set('Cookie', cookies);
 
     await user.destroy();
 
@@ -80,30 +88,30 @@ describe('GET /logs', () => {
   it('should throw an error if the user is not authenticated', async () => {
     expect.assertions(1);
 
-    const response = await request.get('/logs');
+    const response = await request.get('/api/logs');
 
     expect(response.status).toBe(401);
   });
 });
 
-describe('GET /logs/:id', () => {
+describe('GET /api/logs/:id', () => {
   it('should get a log when the user is an admin', async () => {
     expect.assertions(3);
 
-    const user = await UserModel.create(userAdminData);
-    const accessToken = await AuthService.generateJwtAccessToken(user);
-    const refreshToken = await AuthService.generateJwtRefreshToken(user);
+    const superAdmin = await UserModel.create(userSuperAdminData);
+    const accessToken = await AuthService.generateJwtAccessToken(superAdmin);
+    const refreshToken = await AuthService.generateJwtRefreshToken(superAdmin);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    const response = await request.get(`/logs/${log.id}`).set('Cookie', cookies);
+    const response = await request.get(`/api/logs/${log.id}`).set('Cookie', cookies);
 
-    await user.destroy();
+    await superAdmin.destroy();
     await log.destroy();
 
     expect(response.status).toBe(200);
@@ -118,14 +126,14 @@ describe('GET /logs/:id', () => {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const refreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    const response = await request.get(`/logs/${log.id}`).set('Cookie', cookies);
+    const response = await request.get(`/api/logs/${log.id}`).set('Cookie', cookies);
 
     await user.destroy();
     await log.destroy();
@@ -136,9 +144,9 @@ describe('GET /logs/:id', () => {
   it('should throw an error if the user is not authenticated', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
-    const response = await request.get(`/logs/${log.id}`);
+    const response = await request.get(`/api/logs/${log.id}`);
 
     await log.destroy();
 
@@ -146,27 +154,28 @@ describe('GET /logs/:id', () => {
   });
 });
 
-describe('DELETE /logs/:id', () => {
+describe('DELETE /api/logs/:id', () => {
   it('should delete a log when the user is an admin', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
 
-    const user = await UserModel.create(userAdminData);
-    const accessToken = await AuthService.generateJwtAccessToken(user);
-    const refreshToken = await AuthService.generateJwtRefreshToken(user);
+    const superAdmin = await UserModel.create(userSuperAdminData);
+    const accessToken = await AuthService.generateJwtAccessToken(superAdmin);
+    const refreshToken = await AuthService.generateJwtRefreshToken(superAdmin);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    await request.delete(`/logs/${log.id}`).set('Cookie', cookies);
+    const response = await request.delete(`/api/logs/${log.id}`).set('Cookie', cookies);
 
-    const deletedLog = await LogModel.findByPk(log.id);
+    const deletedLog = await ApiLogModel.findByPk(log.id);
 
-    await user.destroy();
+    await superAdmin.destroy();
 
+    expect(response.status).toBe(204);
     expect(deletedLog).toBeNull();
   });
 
@@ -177,14 +186,14 @@ describe('DELETE /logs/:id', () => {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const refreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()};`,
     ];
 
-    const response = await request.delete(`/logs/${log.id}`).set('Cookie', cookies);
+    const response = await request.delete(`/api/logs/${log.id}`).set('Cookie', cookies);
 
     await user.destroy();
     await log.destroy();
@@ -199,14 +208,14 @@ describe('DELETE /logs/:id', () => {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const refreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
     const cookies = [
       `accessToken=${accessToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()}`,
       `refreshToken=${refreshToken}; path=/; expires=${new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toUTCString()}`,
     ];
 
-    const response = await request.delete(`/logs/${log.id}`).set('Cookie', cookies);
+    const response = await request.delete(`/api/logs/${log.id}`).set('Cookie', cookies);
 
     await user.destroy();
     await log.destroy();
@@ -217,9 +226,9 @@ describe('DELETE /logs/:id', () => {
   it('should throw an error if the user is not authenticated', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create(logData);
+    const log = await ApiLogModel.create(logData);
 
-    const response = await request.delete(`/logs/${log.id}`);
+    const response = await request.delete(`/api/logs/${log.id}`);
 
     await log.destroy();
 

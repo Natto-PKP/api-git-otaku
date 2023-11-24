@@ -13,7 +13,6 @@ const userSanctionData: Partial<IUserSanctionModel> = {
   cancelledAt: null,
   cancelledByUserId: null,
   cancelledReason: null,
-  cantCancel: false,
 };
 
 const userData = {
@@ -183,17 +182,18 @@ describe('updateOne', () => {
 
 describe('cancelOne', () => {
   it('should cancel one user sanction', async () => {
-    expect.assertions(3);
+    expect.assertions(4);
 
     const user = await UserModel.create(userData);
     const userSanction = await UserSanctionService.createOne({ ...userSanctionData, userId: user.id });
 
-    await UserSanctionService.cancelOne(userSanction.id, { cancelledReason: 'New reason' });
-    const sanction = await UserSanctionService.getOne(userSanction.id);
+    await UserSanctionService.cancelOne(userSanction.id, { cancelledReason: 'New reason', cancelledByUserId: user.id });
+    const sanction = await UserSanctionService.getOne(userSanction.id, { scope: 'system' });
 
     expect(sanction?.isCancelled).toBe(true);
     expect(sanction?.cancelledAt).not.toBeNull();
     expect(sanction?.cancelledReason).toBe('New reason');
+    expect(sanction?.cancelledByUserId).toBe(user.id);
 
     await userSanction.destroy();
     await user.destroy();

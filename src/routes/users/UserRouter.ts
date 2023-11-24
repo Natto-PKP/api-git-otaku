@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import { validate } from '../../middlewares/validate';
-import { UserGetAllQuerySchema } from './UserSchema';
+import { UserGetAllQuerySchema, UserUpdateBodySchema } from './UserSchema';
 import { handler } from '../../helpers/handler';
 import { UserController } from './UserController';
 import auth from '../../middlewares/auth';
-import { UserValidation } from './UserValidation';
 import { UserSanctionRouter } from './sanctions/UserSanctionRouter';
 import { UserScopes } from '../../models/User/UserScopes';
+import { UserValidation } from './UserValidation';
 
 export const UserRouter = Router();
+
+const scopes = UserScopes;
 
 UserRouter.use('/:userId/sanctions', UserSanctionRouter);
 
@@ -20,9 +22,10 @@ UserRouter.use('/:userId/sanctions', UserSanctionRouter);
  */
 UserRouter.get(
   '/',
-  handler(auth({ required: false, scopes: UserScopes })), // auth middleware, but not required
-  validate(UserGetAllQuerySchema, ['body', 'query'], { allowPagination: true, allowScope: true }), // validate query
-  handler(UserController.getAll), // handle request
+  handler(auth({ required: false, scopes })),
+  validate(UserGetAllQuerySchema, ['body', 'query'], { allowPagination: true, allowScope: true }),
+  handler(UserValidation.getAllQueryParams),
+  handler(UserController.getAll),
 );
 
 /**
@@ -42,10 +45,10 @@ UserRouter.get(
       allowSelf: true,
       allowMeParam: true,
       allowUserIdentifierParam: true,
-      scopes: UserScopes,
+      scopes,
     }),
   ), // can't use @me if not logged in
-  validate(null, ['body', 'query'], { allowScope: true }), // validate params
+  validate(null, ['body', 'query'], { allowScope: true }),
   handler(UserController.getOne),
 );
 
@@ -69,7 +72,8 @@ UserRouter.delete('/:userId', handler(auth({ allowOnlySelf: true })), handler(Us
  */
 UserRouter.patch(
   '/:userId',
-  handler(auth({ allowOnlyAdminOrHigher: true, allowOnlySelf: true })),
-  handler(UserValidation.updateOne),
+  handler(auth({ allowOnlyPermissions: ['user.manage'], allowSelf: true })),
+  validate(UserUpdateBodySchema),
+  handler(UserValidation.updateOneBodyParams),
   handler(UserController.updateOne),
 );

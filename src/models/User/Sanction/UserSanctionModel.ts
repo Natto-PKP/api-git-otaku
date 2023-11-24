@@ -2,7 +2,6 @@ import {
   Table,
   Column,
   DataType,
-  Unique,
   AllowNull,
   Default,
   BelongsTo,
@@ -25,29 +24,27 @@ export interface IUserSanctionModel extends IBaseModel {
   askCancellation: boolean; // if the user asked for the cancellation
   askCancellationAt?: Date | null; // date of the cancellation request
   cancellationReason?: string | null; // reason of the cancellation
-  cantCancel: boolean; // if the sanction can't be cancelled
 
   isCancelled: boolean; // if the sanction is cancelled
   cancelledAt?: Date | null; // date of the cancellation
   cancelledByUserId?: string | null; // user who cancelled
   cancelledReason?: string | null; // reason of the cancellation
-
-  isFinished: boolean; // if the sanction is finished
-  finishedAt?: Date | null; // date of the end of the sanction
 }
 
 @Scopes(() => UserSanctionScopes.scopes())
 @DefaultScope(() => UserSanctionScopes.default())
 @Table({ tableName: 'user_sanction' })
 export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
-  @Unique
+  @AllowNull(false)
   @ForeignKey(() => UserModel)
   @Column({ type: DataType.STRING })
   declare userId: string;
 
+  @AllowNull(false)
   @Column({ type: DataType.STRING })
   declare reason: string;
 
+  @AllowNull(false)
   @Column({ type: DataType.ENUM(...UserSanctionTypes) })
   declare type: UserSanctionType;
 
@@ -56,12 +53,18 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Column({ type: DataType.DATE })
   declare expireAt: Date | null;
 
+  @Column({ type: DataType.VIRTUAL })
+  get isExpired() {
+    return this.expireAt !== null && this.expireAt.getTime() < Date.now();
+  }
+
   @AllowNull(true)
   @Default(null)
   @ForeignKey(() => UserModel)
   @Column({ type: DataType.STRING })
   declare byUserId: string | null;
 
+  @AllowNull(false)
   @Default(false)
   @Column({ type: DataType.BOOLEAN })
   declare askCancellation: boolean;
@@ -71,6 +74,7 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Column({ type: DataType.STRING })
   declare cancellationReason: string | null;
 
+  @AllowNull(false)
   @Default(false)
   @Column({
     type: DataType.BOOLEAN,
@@ -99,14 +103,12 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Column({ type: DataType.STRING })
   declare cancelledReason: string | null;
 
-  @Default(false)
-  @Column({ type: DataType.BOOLEAN })
-  declare cantCancel: boolean;
-
+  @AllowNull(true)
   @Default(null)
   @Column({ type: DataType.DATE })
   declare askCancellationAt: Date | null;
 
+  @AllowNull(false)
   @Default(false)
   @Column({
     type: DataType.BOOLEAN,
@@ -124,12 +126,12 @@ export class UserSanctionModel extends BaseModel implements IUserSanctionModel {
   @Column({ type: DataType.DATE })
   declare finishedAt: Date | null;
 
-  @BelongsTo(() => UserModel, { foreignKey: 'userId', onDelete: 'CASCADE' })
-  declare user: UserSanctionModel;
+  @BelongsTo(() => UserModel, { onDelete: 'CASCADE' })
+  declare user: UserModel;
 
-  @BelongsTo(() => UserModel, { foreignKey: 'byUserId', onDelete: 'SET NULL' })
+  @BelongsTo(() => UserModel, { onDelete: 'SET NULL' })
   declare byUser: UserModel;
 
-  @BelongsTo(() => UserModel, { foreignKey: 'cancelledByUserId', onDelete: 'SET NULL' })
+  @BelongsTo(() => UserModel, { onDelete: 'SET NULL' })
   declare cancelledByUser: UserModel;
 }

@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 
 import { server } from '../../server';
+import { UserModel } from '../../models';
 
 const request = supertest(server);
 
@@ -23,6 +24,8 @@ describe('POST /register', () => {
       password,
       pseudo,
     });
+
+    await UserModel.destroy({ where: { email } });
 
     expect(response.status).toBe(201);
 
@@ -89,15 +92,18 @@ describe('POST /login', () => {
   it('should login a user with username', async () => {
     expect.assertions(3);
 
+    await UserModel.create({ email, username, password, pseudo });
+
     const response = await request.post('/auth/login').send({
       username,
       password,
     });
 
-    expect(response.status).toBe(200);
+    await UserModel.destroy({ where: { email } });
 
     const cookies = response.get('Set-Cookie');
 
+    expect(response.status).toBe(200);
     expect(cookies).toBeDefined();
     expect(cookies.length).toBe(2);
   });
@@ -105,10 +111,14 @@ describe('POST /login', () => {
   it('should login a user with email', async () => {
     expect.assertions(1);
 
+    await UserModel.create({ email, username, password, pseudo });
+
     const response = await request.post('/auth/login').send({
       email,
       password,
     });
+
+    await UserModel.destroy({ where: { email } });
 
     expect(response.status).toBe(200);
   });

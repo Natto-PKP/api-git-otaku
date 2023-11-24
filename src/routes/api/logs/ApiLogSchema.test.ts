@@ -1,10 +1,10 @@
-import { LogGetAllQuerySchema } from './LogSchema';
+import { ApiLogGetAllQuerySchema } from './ApiLogSchema';
 
-describe('LogGetAllQuerySchema', () => {
+describe('ApiLogGetAllQuerySchema', () => {
   it('should validate a valid query', async () => {
     expect.assertions(1);
 
-    const { error } = LogGetAllQuerySchema.validate({
+    const { error } = ApiLogGetAllQuerySchema.validate({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
@@ -16,7 +16,7 @@ describe('LogGetAllQuerySchema', () => {
   it('should validate a valid query with no optional fields', async () => {
     expect.assertions(1);
 
-    const { error } = LogGetAllQuerySchema.validate({});
+    const { error } = ApiLogGetAllQuerySchema.validate({});
 
     expect(error).toBeUndefined();
   });
@@ -24,7 +24,7 @@ describe('LogGetAllQuerySchema', () => {
   it('should not validate a query with wrong type', async () => {
     expect.assertions(1);
 
-    const { error } = LogGetAllQuerySchema.validate({
+    const { error } = ApiLogGetAllQuerySchema.validate({
       type: 'WRONG_TYPE',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
@@ -36,7 +36,7 @@ describe('LogGetAllQuerySchema', () => {
   it('should not validate a query with wrong status', async () => {
     expect.assertions(1);
 
-    const { error } = LogGetAllQuerySchema.validate({
+    const { error } = ApiLogGetAllQuerySchema.validate({
       type: 'ERROR',
       status: -1,
       code: 'INTERNAL_SERVER_ERROR',
@@ -48,7 +48,7 @@ describe('LogGetAllQuerySchema', () => {
   it('should not validate a query with wrong code', async () => {
     expect.assertions(1);
 
-    const { error } = LogGetAllQuerySchema.validate({
+    const { error } = ApiLogGetAllQuerySchema.validate({
       type: 'ERROR',
       status: 500,
       code: 'WRONG_CODE',

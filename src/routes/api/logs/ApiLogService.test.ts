@@ -1,11 +1,11 @@
-import { LogModel } from '../../models';
-import { LogService } from './LogService';
+import { ApiLogModel } from '../../../models';
+import { ApiLogService } from './ApiLogService';
 
 describe('createOne', () => {
   it('should create a log', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create({
+    const log = await ApiLogModel.create({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
@@ -13,6 +13,8 @@ describe('createOne', () => {
     });
 
     expect(log).toBeDefined();
+
+    await log.destroy();
   });
 });
 
@@ -20,7 +22,7 @@ describe('getAll', () => {
   it('should get all logs', async () => {
     expect.assertions(2);
 
-    const logs = await LogService.getAll({ page: 1, limit: 10, offset: 0 }, {}, { scope: 'private', count: true });
+    const logs = await ApiLogService.getAll({ page: 1, limit: 10, offset: 0 }, {}, { count: true });
 
     expect(logs.data).toBeDefined();
     expect(Array.isArray(logs.data)).toBe(true);
@@ -29,10 +31,10 @@ describe('getAll', () => {
   it('should get all logs with query', async () => {
     expect.assertions(2);
 
-    const logs = await LogService.getAll(
+    const logs = await ApiLogService.getAll(
       { page: 1, limit: 10, offset: 0 },
       { type: 'ERROR', status: 500, code: 'INTERNAL_SERVER_ERROR' },
-      { scope: 'private', count: true }
+      { scope: 'private', count: true },
     );
 
     expect(logs.data).toBeDefined();
@@ -42,10 +44,10 @@ describe('getAll', () => {
   it('should get all logs with query and pagination', async () => {
     expect.assertions(2);
 
-    const logs = await LogService.getAll(
+    const logs = await ApiLogService.getAll(
       { page: 1, limit: 10, offset: 0 },
       { type: 'ERROR', status: 500, code: 'INTERNAL_SERVER_ERROR' },
-      { scope: 'private', count: true }
+      { scope: 'private', count: true },
     );
 
     expect(logs.data).toBeDefined();
@@ -57,14 +59,14 @@ describe('getOne', () => {
   it('should get a log', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create({
+    const log = await ApiLogModel.create({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
     });
 
-    const found = await LogService.getOne(log.id);
+    const found = await ApiLogService.getOne(log.id);
 
     await log.destroy();
 
@@ -74,7 +76,7 @@ describe('getOne', () => {
   it('should not get a log', async () => {
     expect.assertions(1);
 
-    const found = await LogService.getOne('invalid-id');
+    const found = await ApiLogService.getOne('invalid-id');
 
     expect(found).toBeNull();
   });
@@ -82,14 +84,14 @@ describe('getOne', () => {
   it('should get a log with options', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create({
+    const log = await ApiLogModel.create({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
     });
 
-    const found = await LogService.getOne(log.id, { scope: 'private' });
+    const found = await ApiLogService.getOne(log.id, { scope: 'private' });
 
     await log.destroy();
 
@@ -101,16 +103,16 @@ describe('deleteOne', () => {
   it('should delete a log', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create({
+    const log = await ApiLogModel.create({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
     });
 
-    await LogService.deleteOne(log);
+    await ApiLogService.deleteOne(log);
 
-    const found = await LogService.getOne(log.id);
+    const found = await ApiLogService.getOne(log.id);
 
     expect(found).toBeNull();
   });
@@ -118,16 +120,16 @@ describe('deleteOne', () => {
   it('should delete a log with id', async () => {
     expect.assertions(1);
 
-    const log = await LogModel.create({
+    const log = await ApiLogModel.create({
       type: 'ERROR',
       status: 500,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
     });
 
-    await LogService.deleteOne(log.id);
+    await ApiLogService.deleteOne(log.id);
 
-    const found = await LogService.getOne(log.id);
+    const found = await ApiLogService.getOne(log.id);
 
     expect(found).toBeNull();
   });
@@ -135,7 +137,7 @@ describe('deleteOne', () => {
   it('should not delete a log', async () => {
     expect.assertions(1);
 
-    await LogService.deleteOne('invalid-id');
+    await ApiLogService.deleteOne('invalid-id');
 
     expect(true).toBe(true);
   });

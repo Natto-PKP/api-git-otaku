@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 
-import BasicError from '../errors/BasicError';
-import { ErrorCode, ErrorCodes, ErrorType } from '../errors/BaseError';
-import { LogService } from './logs/LogService';
+import { BasicError } from '../errors/BasicError';
+import { ErrorCode, ErrorCodes } from '../errors/BaseError';
+import { ApiLogService } from './api/logs/ApiLogService';
 import type { AuthRequest } from '../middlewares/auth';
 
 // Interfaces
@@ -20,15 +20,12 @@ interface Params {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default async (error: Error, req: Request, res: Response, _next: NextFunction) => {
-  let type = 'ERROR' as ErrorType; // type of error
-
   // default params
   let params = { code: 'UNKNOW_ERROR' as ErrorCode, message: ErrorCodes.UNKNOW_ERROR as string, status: 500 } as Params;
   let logit = false; // whether to log the error or not
 
   if (error instanceof BasicError) {
     // if error is a BasicError
-    type = error.type; // set type
     params = { code: error.code, message: error.message, status: error.status }; // set params
     logit = error.options.logit ?? true; // set logit
   } else if (error instanceof Joi.ValidationError) {
@@ -45,28 +42,12 @@ export default async (error: Error, req: Request, res: Response, _next: NextFunc
     };
   } else logit = true; // if error is not a BasicError or a Joi.ValidationError, log it
 
-  if (params.status === 500) console.error(error); // if status is 500, log error
+  if (params.status === 500) console.error(error);
 
   res.status(params.status).json(params); // send error response
 
   if (logit) {
-    // if error should be logged
-    const user = (req as AuthRequest).user || null; // get user from request
-
-    await LogService.createOne({
-      type,
-      status: params.status,
-      code: params.code,
-      message: params.message,
-      stack: error.stack,
-      url: req.url,
-      method: req.method,
-      params: req.params,
-      query: req.query,
-      body: req.body,
-      headers: req.headers,
-      updatedById: user?.id || null,
-      createdById: user?.id || null,
-    });
+    const user = (req as AuthRequest).user || null;
+    await ApiLogService.from(error, user, req as AuthRequest<false>);
   }
 };

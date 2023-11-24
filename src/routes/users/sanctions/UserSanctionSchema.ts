@@ -5,11 +5,9 @@ export const UserSanctionGetAllQuerySchema = Joi.object().keys({
   type: Joi.string().valid(...UserSanctionTypes),
   askCancellation: Joi.boolean(),
   isCancelled: Joi.boolean(),
-  byUserId: Joi.string().uuid(),
 });
 
 export const UserSanctionCreateOneSchema = Joi.object().keys({
-  userId: Joi.string().uuid().required(),
   reason: Joi.string().required(),
   type: Joi.string()
     .valid(...UserSanctionTypes)

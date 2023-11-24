@@ -1,4 +1,4 @@
-import { UserAdminUpdateBodySchema, UserGetAllQuerySchema, UserSelfUpdateBodySchema } from './UserSchema';
+import { UserGetAllQuerySchema, UserUpdateBodySchema } from './UserSchema';
 
 describe('UserGetAllQuerySchema', () => {
   it('should validate a valid query', async () => {
@@ -68,79 +68,12 @@ describe('UserGetAllQuerySchema', () => {
   });
 });
 
-describe('UserSelfUpdateBodySchema', () => {
+describe('UserUpdateBodySchema', () => {
   it('should validate a valid body', async () => {
     expect.assertions(1);
 
-    const { error } = UserSelfUpdateBodySchema.validate({
-      username: 'user',
-      pseudo: 'Super user',
-      email: 'user@domain.com',
-      password: 'Password1L!',
-      isPrivate: true,
-    });
-
-    expect(error).toBeUndefined();
-  });
-
-  it('should validate a valid body with no optional fields', async () => {
-    expect.assertions(1);
-
-    const { error } = UserSelfUpdateBodySchema.validate({});
-
-    expect(error).toBeUndefined();
-  });
-
-  it('should not validate a body with wrong username', async () => {
-    expect.assertions(1);
-
-    const { error } = UserSelfUpdateBodySchema.validate({
-      username: 'wrong_',
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a body with wrong pseudo', async () => {
-    expect.assertions(1);
-
-    const { error } = UserSelfUpdateBodySchema.validate({
-      pseudo: 'wrong_ ',
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a body with wrong email', async () => {
-    expect.assertions(1);
-
-    const { error } = UserSelfUpdateBodySchema.validate({
-      email: 'wrong_email',
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a body with wrong password', async () => {
-    expect.assertions(1);
-
-    const { error } = UserSelfUpdateBodySchema.validate({
-      password: 'wrong_password',
-    });
-
-    expect(error).toBeDefined();
-  });
-});
-
-describe('UserAdminUpdateBodySchema', () => {
-  it('should validate a valid body', async () => {
-    expect.assertions(1);
-
-    const { error } = UserAdminUpdateBodySchema.validate({
-      username: 'user',
-      pseudo: 'Super user',
+    const { error } = UserUpdateBodySchema.validate({
       role: 'ADMIN',
-      isPrivate: true,
     });
 
     expect(error).toBeUndefined();
@@ -149,36 +82,26 @@ describe('UserAdminUpdateBodySchema', () => {
   it('should validate a valid body with no optional fields', async () => {
     expect.assertions(1);
 
-    const { error } = UserAdminUpdateBodySchema.validate({});
+    const { error } = UserUpdateBodySchema.validate({});
 
     expect(error).toBeUndefined();
-  });
-
-  it('should not validate a body with wrong username', async () => {
-    expect.assertions(1);
-
-    const { error } = UserAdminUpdateBodySchema.validate({
-      username: 'wrong_',
-    });
-
-    expect(error).toBeDefined();
-  });
-
-  it('should not validate a body with wrong pseudo', async () => {
-    expect.assertions(1);
-
-    const { error } = UserAdminUpdateBodySchema.validate({
-      pseudo: 'wrong_ ',
-    });
-
-    expect(error).toBeDefined();
   });
 
   it('should not validate a body with wrong role', async () => {
     expect.assertions(1);
 
-    const { error } = UserAdminUpdateBodySchema.validate({
-      role: 'wrong_role',
+    const { error } = UserUpdateBodySchema.validate({
+      role: 'WRONG_ROLE',
+    });
+
+    expect(error).toBeDefined();
+  });
+
+  it('should not validate a body with wrong isPrivate', async () => {
+    expect.assertions(1);
+
+    const { error } = UserUpdateBodySchema.validate({
+      isVerified: 'wrong_isVerified',
     });
 
     expect(error).toBeDefined();
@@ -187,7 +110,7 @@ describe('UserAdminUpdateBodySchema', () => {
   it('should not validate a body with wrong fields', async () => {
     expect.assertions(1);
 
-    const { error } = UserAdminUpdateBodySchema.validate({
+    const { error } = UserUpdateBodySchema.validate({
       wrongField: 'wrongField',
     });
 

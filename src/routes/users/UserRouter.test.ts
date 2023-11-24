@@ -54,6 +54,24 @@ describe('GET /users', () => {
     expect(response.status).toBe(200);
   });
 
+  it('should not get all users with role query if authenticated user is not allowed', async () => {
+    expect.assertions(1);
+
+    const user = await UserModel.create(userData);
+
+    const token = await AuthService.generateJwtAccessToken(user);
+
+    const cookies = [
+      `accessToken=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}; SameSite=Lax`,
+    ];
+
+    const response = await request.get('/users?role=ADMIN').set('Cookie', cookies);
+
+    await user.destroy();
+
+    expect(response.status).toBe(403);
+  });
+
   it('should get all users with authenticated user', async () => {
     expect.assertions(1);
 

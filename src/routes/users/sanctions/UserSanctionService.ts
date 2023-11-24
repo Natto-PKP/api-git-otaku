@@ -26,6 +26,22 @@ export class UserSanctionService {
     return UserSanctionModel.create(data);
   }
 
+  static async isAlreadySanctioned(userId: string, type: IData['type'] | IData['type'][]) {
+    const types = Array.isArray(type) ? type : [type];
+    const typeIn = [] as string[];
+    const where = { userId, type: { [Op.in]: typeIn } } as { [key: string | symbol]: unknown };
+
+    if (types.includes('BAN')) typeIn.push('BAN');
+    if (types.includes('TEMP_BAN')) {
+      typeIn.push('TEMP_BAN');
+      where.expireAt = { [Op.gt]: new Date() };
+    }
+
+    const sanction = await UserSanctionModel.findOne({ where });
+
+    return !!sanction;
+  }
+
   static async getAll(pagination: IPaginationFrom, query: GetAllQuery, options?: GetAllOptions) {
     const scope = options?.scope || 'public'; // get scope
 
@@ -85,25 +101,13 @@ export class UserSanctionService {
     sanction: string | UserSanctionModel | IUserSanctionModel,
     data: Pick<IData, 'cancelledReason' | 'cancelledByUserId'>,
   ) {
-    const d = { ...data, isCancelled: true, cantCancel: true } as IData;
+    const d = { ...data, isCancelled: true } as IData;
 
     if (typeof sanction === 'string') await UserSanctionModel.update(d, { where: { id: sanction } });
     else await UserSanctionModel.update(d, { where: { id: sanction.id } });
   }
 
-  static async finishOne(sanction: string | UserSanctionModel | IUserSanctionModel) {
-    const d = { isFinished: true, cantCancel: true } as IData;
-
-    if (typeof sanction === 'string') await UserSanctionModel.update(d, { where: { id: sanction } });
-    else await UserSanctionModel.update(d, { where: { id: sanction.id } });
-  }
-
-  static async finishAllWhoExpired() {
-    const now = new Date();
-
-    await UserSanctionModel.update(
-      { isFinished: true, cantCancel: true },
-      { where: { isFinished: false, expireAt: { [Op.lte]: now } } },
-    );
+  static async clear(userId: string) {
+    await UserSanctionModel.destroy({ where: { userId } });
   }
 }

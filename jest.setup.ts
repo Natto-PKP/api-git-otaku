@@ -1,5 +1,10 @@
-import { database } from './src/database';
+import { Database } from './src/database';
 
 beforeAll(async () => {
-  await database.sync({ force: true });
+  await Database.connect();
+});
+
+afterAll(async () => {
+  await Database.truncate();
+  await Database.disconnect();
 });

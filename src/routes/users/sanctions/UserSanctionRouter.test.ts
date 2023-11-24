@@ -126,6 +126,7 @@ describe('GET /users/:userId/sanctions', () => {
     expect(response.status).toBe(403);
 
     await user.destroy();
+    await user2.destroy();
   });
 });
 
@@ -149,36 +150,38 @@ describe('GET /users/:userId/sanctions/:sanctionId', () => {
     await admin.destroy();
   });
 
-  // it('should not get a user sanction with unauthenticated user', async () => {
-  //   expect.assertions(1);
+  it('should not get a user sanction with unauthenticated user', async () => {
+    expect.assertions(1);
 
-  //   const user = await UserModel.create(userData);
-  //   const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
+    const user = await UserModel.create(userData);
+    const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
 
-  //   const response = await request.get(`/users/${user.id}/sanctions/${userSanction.id}`);
+    const response = await request.get(`/users/${user.id}/sanctions/${userSanction.id}`);
 
-  //   expect(response.status).toBe(401);
+    expect(response.status).toBe(401);
 
-  //   await userSanction.destroy();
-  //   await user.destroy();
-  // });
+    await userSanction.destroy();
+    await user.destroy();
+  });
 
-  // it('should not get a user sanction with non admin user', async () => {
-  //   expect.assertions(1);
+  it('should not get a user sanction with non admin user', async () => {
+    expect.assertions(1);
 
-  //   const user = await UserModel.create(userData);
-  //   const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
+    const user = await UserModel.create(userData);
+    const anotherUser = await UserModel.create(userHelperData);
+    const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
 
-  //   const accessToken = await AuthService.generateJwtAccessToken(user);
-  //   const cookies = [`accessToken=${accessToken}`];
+    const accessToken = await AuthService.generateJwtAccessToken(anotherUser);
+    const cookies = [`accessToken=${accessToken}`];
 
-  //   const response = await request.get(`/users/${user.id}/sanctions/${userSanction.id}`).set('Cookie', cookies);
+    const response = await request.get(`/users/${user.id}/sanctions/${userSanction.id}`).set('Cookie', cookies);
 
-  //   expect(response.status).toBe(403);
+    expect(response.status).toBe(403);
 
-  //   await userSanction.destroy();
-  //   await user.destroy();
-  // });
+    await userSanction.destroy();
+    await user.destroy();
+    await anotherUser.destroy();
+  });
 });
 
 describe('POST /users/:userId/sanctions', () => {
@@ -194,7 +197,7 @@ describe('POST /users/:userId/sanctions', () => {
     const response = await request
       .post(`/users/${user.id}/sanctions`)
       .set('Cookie', cookies)
-      .send({ ...userSanctionData, userId: user.id });
+      .send({ ...userSanctionData });
 
     expect(response.status).toBe(201);
 
@@ -208,7 +211,7 @@ describe('POST /users/:userId/sanctions', () => {
 
     const user = await UserModel.create(userData);
 
-    const response = await request.post(`/users/${user.id}/sanctions`).send({ ...userSanctionData, userId: user.id });
+    const response = await request.post(`/users/${user.id}/sanctions`).send({ ...userSanctionData });
 
     expect(response.status).toBe(401);
 
@@ -226,7 +229,7 @@ describe('POST /users/:userId/sanctions', () => {
     const response = await request
       .post(`/users/${user.id}/sanctions`)
       .set('Cookie', cookies)
-      .send({ ...userSanctionData, userId: user.id });
+      .send({ ...userSanctionData });
 
     expect(response.status).toBe(403);
 
@@ -245,7 +248,7 @@ describe('POST /users/:userId/sanctions', () => {
     const response = await request
       .post(`/users/${admin.id}/sanctions`)
       .set('Cookie', cookies)
-      .send({ ...userSanctionData, userId: admin.id });
+      .send({ ...userSanctionData });
 
     expect(response.status).toBe(403);
 
@@ -274,34 +277,34 @@ describe('DELETE /users/:userId/sanctions/:sanctionId', () => {
     await admin.destroy();
   });
 
-  // it('should not cancel a user sanction with unauthenticated user', async () => {
-  //   expect.assertions(1);
+  it('should not cancel a user sanction with unauthenticated user', async () => {
+    expect.assertions(1);
 
-  //   const user = await UserModel.create(userData);
-  //   const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
+    const user = await UserModel.create(userData);
+    const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
 
-  //   const response = await request.delete(`/users/${user.id}/sanctions/${userSanction.id}`);
+    const response = await request.delete(`/users/${user.id}/sanctions/${userSanction.id}`);
 
-  //   expect(response.status).toBe(401);
+    expect(response.status).toBe(401);
 
-  //   await userSanction.destroy();
-  //   await user.destroy();
-  // });
+    await userSanction.destroy();
+    await user.destroy();
+  });
 
-  // it('should not cancel a user sanction with non admin user', async () => {
-  //   expect.assertions(1);
+  it('should not cancel a user sanction with non admin user', async () => {
+    expect.assertions(1);
 
-  //   const user = await UserModel.create(userData);
-  //   const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
+    const user = await UserModel.create(userData);
+    const userSanction = await UserSanctionModel.create({ ...userSanctionData, userId: user.id });
 
-  //   const accessToken = await AuthService.generateJwtAccessToken(user);
-  //   const cookies = [`accessToken=${accessToken}`];
+    const accessToken = await AuthService.generateJwtAccessToken(user);
+    const cookies = [`accessToken=${accessToken}`];
 
-  //   const response = await request.delete(`/users/${user.id}/sanctions/${userSanction.id}`).set('Cookie', cookies);
+    const response = await request.delete(`/users/${user.id}/sanctions/${userSanction.id}`).set('Cookie', cookies);
 
-  //   expect(response.status).toBe(403);
+    expect(response.status).toBe(403);
 
-  //   await userSanction.destroy();
-  //   await user.destroy();
-  // });
+    await userSanction.destroy();
+    await user.destroy();
+  });
 });

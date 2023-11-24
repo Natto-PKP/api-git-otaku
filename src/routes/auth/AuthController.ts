@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 import { ACCESS_TOKEN_EXPIRATION, AuthService, REFRESH_TOKEN_EXPIRATION } from './AuthService';
 import { UserService } from '../users/UserService';
-import BasicError from '../../errors/BasicError';
+import { AuthenticationError, BasicError } from '../../errors/BasicError';
+import { UserSanctionService } from '../users/sanctions/UserSanctionService';
 
 /**
  * Auth controller
@@ -17,17 +18,25 @@ export class AuthController {
 
     // get user by username or email
     const user = await UserService.getOneByUsernameOrEmail(username, email, { scope: 'system' });
-    if (!user) throw new BasicError({ type: 'ERROR', code: 'INVALID_CREDENTIALS', status: 400 }, { logit: false });
+    if (!user) {
+      throw new BasicError(
+        { code: 'INVALID_CREDENTIALS', status: 400, message: 'invalid credentials' },
+        { logit: false },
+      );
+    }
 
     // check password
     const isPasswordValid = await AuthService.comparePassword(password, user.password);
     if (!isPasswordValid) {
-      throw new BasicError({ type: 'ERROR', code: 'INVALID_CREDENTIALS', status: 400 }, { logit: false });
+      throw new BasicError(
+        { code: 'INVALID_CREDENTIALS', status: 400, message: 'invalid credentials' },
+        { logit: false },
+      );
     }
 
     // check if user is banned
-    if (await user.isBanned()) {
-      throw new BasicError({ type: 'ERROR', code: 'BANNED', status: 403 }, { logit: false });
+    if (await UserSanctionService.isAlreadySanctioned(user.id, ['BAN', 'TEMP_BAN'])) {
+      throw new BasicError({ code: 'BANNED', status: 403, message: 'you are banned' }, { logit: false });
     }
 
     // generate tokens
@@ -53,7 +62,7 @@ export class AuthController {
     const user = await UserService.getOneByUsernameOrEmail(body.username, body.email, { scope: 'system' });
     if (user) {
       throw new BasicError(
-        { type: 'ERROR', code: 'USER_ALREADY_EXISTS', status: 400, message: 'User already exists' },
+        { code: 'USER_ALREADY_EXISTS', status: 400, message: 'user already exists' },
         { logit: false },
       );
     }
@@ -79,15 +88,15 @@ export class AuthController {
    */
   static async refresh(req: Request, res: Response) {
     const { refreshToken } = req.cookies; // get refresh token from cookies
-    if (!refreshToken) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+    if (!refreshToken) throw AuthenticationError('you are not authenticated', { logit: false });
 
     // verify refresh token
     const decoded = await AuthService.verifyJwtRefreshToken(refreshToken);
-    if (!decoded) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+    if (!decoded) throw AuthenticationError('you are not authenticated', { logit: false });
 
     // check token validity
     const user = await UserService.getOne(decoded.id);
-    if (!user) throw new BasicError({ type: 'ERROR', code: 'UNAUTHORIZED', status: 401 }, { logit: false });
+    if (!user) throw AuthenticationError('you are not authenticated', { logit: false });
 
     // generate tokens
     const accessToken = await AuthService.generateJwtAccessToken(user);
