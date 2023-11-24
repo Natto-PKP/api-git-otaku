@@ -1,3 +1,16 @@
+### # Version 0.3.0
+
+```md
+- Rework models
+- Rework scopes
+- Rework routes
+- Rework permission system
+- Rework role system
+- Rework endpoints
+- Rework unit test
+- Reword project config
+```
+
 ### # Version 0.2.0
 
 ```md
