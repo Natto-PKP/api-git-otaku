@@ -46,6 +46,14 @@ describe('GET /users', () => {
     expect(response.status).toBe(200);
   });
 
+  it('should throw error if query is invalid', async () => {
+    expect.assertions(1);
+
+    const response = await request.get('/users?wrong=invalid');
+
+    expect(response.status).toBe(400);
+  });
+
   it('should get all users with query and pagination', async () => {
     expect.assertions(1);
 
@@ -145,7 +153,7 @@ describe('GET /users/:identifier', () => {
       `accessToken=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME}; SameSite=Lax`,
     ];
 
-    const response = await request.get(`/users/@me`).set('Cookie', cookies);
+    const response = await request.get(`/users/@me?scope=private`).set('Cookie', cookies);
 
     await user.destroy();
 
@@ -285,7 +293,7 @@ describe('PATCH /users/:userId', () => {
     await user.destroy();
     await admin.destroy();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(204);
   });
 
   it('should not update a user with helper', async () => {
@@ -332,7 +340,7 @@ describe('PATCH /users/:userId', () => {
 
     await user.destroy();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(204);
   });
 
   it('should not update a user if not self', async () => {

@@ -64,7 +64,7 @@ export class UserService {
 
     // build result
     const result = {
-      data,
+      data: data,
       currentPage: pagination.page,
       totalPage: null as number | null,
       total: null as number | null,

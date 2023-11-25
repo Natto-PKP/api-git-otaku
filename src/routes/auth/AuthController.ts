@@ -1,19 +1,19 @@
-import type { Request, Response } from 'express';
+import { Controller, Route, Delete, Request, Middlewares, Post, Tags } from 'tsoa';
+import { Request as ExRequest } from 'express';
+
 import { ACCESS_TOKEN_EXPIRATION, AuthService, REFRESH_TOKEN_EXPIRATION } from './AuthService';
 import { UserService } from '../users/UserService';
 import { AuthenticationError, BasicError } from '../../errors/BasicError';
 import { UserSanctionService } from '../users/sanctions/UserSanctionService';
+import { validate } from '../../middlewares/validate';
+import { LoginSchema, RegisterSchema } from './AuthSchema';
 
-/**
- * Auth controller
- */
-export class AuthController {
-  /**
-   * Login
-   * @param req
-   * @param res
-   */
-  static async login(req: Request, res: Response) {
+@Tags('auth')
+@Route('auth')
+export class AuthController extends Controller {
+  @Middlewares(validate(LoginSchema, ['body', 'query']))
+  @Post('login')
+  public async login(@Request() req: ExRequest) {
     const { username, email, password } = req.body; // get username, email and password from body
 
     // get user by username or email
@@ -43,19 +43,16 @@ export class AuthController {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const refreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    res
-      .status(200) // send tokens
-      .cookie('refreshToken', refreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
-      .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
-      .send();
+    this.setStatus(200);
+    this.setHeader('Set-Cookie', [
+      `refreshToken=${refreshToken}; HttpOnly; Max-Age=${REFRESH_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+      `accessToken=${accessToken}; HttpOnly; Max-Age=${ACCESS_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+    ]);
   }
 
-  /**
-   * Register
-   * @param req
-   * @param res
-   */
-  static async register(req: Request, res: Response) {
+  @Middlewares(validate(RegisterSchema, ['body', 'query']))
+  @Post('register')
+  public async register(@Request() req: ExRequest) {
     const { body } = req; // get body
 
     // check if user already exists
@@ -74,19 +71,15 @@ export class AuthController {
     const accessToken = await AuthService.generateJwtAccessToken(newUser);
     const refreshToken = await AuthService.generateJwtRefreshToken(newUser);
 
-    res
-      .status(201) // send tokens
-      .cookie('refreshToken', refreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
-      .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
-      .send();
+    this.setStatus(201);
+    this.setHeader('Set-Cookie', [
+      `refreshToken=${refreshToken}; HttpOnly; Max-Age=${REFRESH_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+      `accessToken=${accessToken}; HttpOnly; Max-Age=${ACCESS_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+    ]);
   }
 
-  /**
-   * Refresh tokens
-   * @param req
-   * @param res
-   */
-  static async refresh(req: Request, res: Response) {
+  @Post('refresh')
+  public async refresh(@Request() req: ExRequest) {
     const { refreshToken } = req.cookies; // get refresh token from cookies
     if (!refreshToken) throw AuthenticationError('you are not authenticated', { logit: false });
 
@@ -102,19 +95,20 @@ export class AuthController {
     const accessToken = await AuthService.generateJwtAccessToken(user);
     const newRefreshToken = await AuthService.generateJwtRefreshToken(user);
 
-    res
-      .status(200) // send tokens
-      .cookie('refreshToken', newRefreshToken, { httpOnly: true, /* secure: true, */ maxAge: REFRESH_TOKEN_EXPIRATION })
-      .cookie('accessToken', accessToken, { httpOnly: true, /* secure: true, */ maxAge: ACCESS_TOKEN_EXPIRATION })
-      .send();
+    this.setStatus(200);
+    this.setHeader('Set-Cookie', [
+      `refreshToken=${newRefreshToken}; HttpOnly; Max-Age=${REFRESH_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+      `accessToken=${accessToken}; HttpOnly; Max-Age=${ACCESS_TOKEN_EXPIRATION}; Path=/; SameSite=Lax;`,
+    ]);
   }
 
-  /**
-   * Logout
-   * @param _req
-   * @param res
-   */
-  static async logout(_req: Request, res: Response) {
-    res.status(200).clearCookie('refresh_token').clearCookie('access_token').send();
+  @Delete('logout')
+  public async logout() {
+    this.setStatus(204);
+
+    this.setHeader('Set-Cookie', [
+      `refreshToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax;`,
+      `accessToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax;`,
+    ]);
   }
 }

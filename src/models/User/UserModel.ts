@@ -14,20 +14,20 @@ import {
 import { UserScopes } from './UserScopes';
 
 export interface IUserModel extends IBaseModel {
-  username: string; // unique
-  email: string; // unique
+  username: string;
+  email: string;
   password: string;
   pseudo: string;
 
-  role: UserRole; // default 'USER'
+  role: UserRole;
 
   // avatarId?: string | null; // default null
   // bannerId?: string | null; // default null
 
-  isPrivate: boolean; // default false
+  isPrivate: boolean;
 
-  isVerified: boolean; // default false
-  verifiedAt?: Date | null; // default null
+  isVerified: boolean;
+  verifiedAt?: Date | null;
 }
 
 @Scopes(() => UserScopes.scopes())

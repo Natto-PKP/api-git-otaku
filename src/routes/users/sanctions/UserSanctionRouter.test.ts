@@ -199,7 +199,7 @@ describe('POST /users/:userId/sanctions', () => {
       .set('Cookie', cookies)
       .send({ ...userSanctionData });
 
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(204);
 
     await UserSanctionModel.destroy({ where: { userId: user.id } });
     await admin.destroy();

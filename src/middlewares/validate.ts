@@ -28,22 +28,26 @@ export const validate = (schema: ObjectSchema | null, props: Prop[] = ['body'], 
   const sch = schema || EmptySchema;
 
   const controller = (request: Request, _res: Response, next: NextFunction) => {
-    const req = request as AuthRequest<false>; // get request
+    try {
+      const req = request as AuthRequest<false>; // get request
 
-    // validate params
-    let params = {} as { [key: string]: unknown }; // get params
-    if (props.includes('body')) params = { ...params, ...req.body };
-    if (props.includes('params')) params = { ...params, ...req.params };
-    if (props.includes('query')) params = { ...params, ...req.query };
+      // validate params
+      let params = {} as { [key: string]: unknown }; // get params
+      if (props.includes('body')) params = { ...params, ...req.body };
+      if (props.includes('params')) params = { ...params, ...req.params };
+      if (props.includes('query')) params = { ...params, ...req.query };
 
-    let schemaToValidate = sch;
-    if (allowScope) schemaToValidate = schemaToValidate.keys(ScopeSchemaData);
-    if (allowPagination) schemaToValidate = schemaToValidate.keys(PaginationSchemaData);
+      let schemaToValidate = sch;
+      if (allowScope) schemaToValidate = schemaToValidate.keys(ScopeSchemaData);
+      if (allowPagination) schemaToValidate = schemaToValidate.keys(PaginationSchemaData);
 
-    const { error } = schemaToValidate.validate(params);
-    if (error) throw error;
+      const { error } = schemaToValidate.validate(params);
+      if (error) throw error;
 
-    return next();
+      return next();
+    } catch (error) {
+      next(error);
+    }
   };
 
   return controller;

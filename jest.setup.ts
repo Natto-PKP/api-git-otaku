@@ -4,7 +4,10 @@ beforeAll(async () => {
   await Database.connect();
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await Database.truncate();
+});
+
+afterAll(async () => {
   await Database.disconnect();
 });

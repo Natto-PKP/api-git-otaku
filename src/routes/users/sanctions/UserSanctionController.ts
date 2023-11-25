@@ -1,40 +1,60 @@
-import type { Request, Response } from 'express';
+import { Controller, Route, Get, Delete, Request, Middlewares, Post, Tags } from 'tsoa';
+
 import type { AuthRequest } from '../../../middlewares/auth';
 import { PaginationService } from '../../../utils/PaginationUtil';
 import { ForbiddenError, NotFoundError } from '../../../errors/BasicError';
 import { UserSanctionService } from './UserSanctionService';
 import { UserService } from '../UserService';
+import auth from '../../../middlewares/auth';
+import { IUserSanctionModel } from '../../../models';
+import { validate } from '../../../middlewares/validate';
+import { UserSanctionCreateOneSchema, UserSanctionGetAllQuerySchema } from './UserSanctionSchema';
 
-export class UserSanctionController {
-  static async getAll(request: Request, res: Response) {
-    const req = request as AuthRequest;
+@Tags('users/{userId}/sanctions')
+@Route('users/{userId}/sanctions')
+export class UserSanctionController extends Controller {
+  @Middlewares(validate(UserSanctionGetAllQuerySchema, ['query', 'body'], { allowPagination: true, allowScope: true }))
+  @Middlewares(auth({ allowSelf: true, allowOnlyPermissions: ['user.sanction'] }))
+  @Get()
+  public async getAll(@Request() req: AuthRequest) {
     const params = { ...req.query, ...req.body };
     const pagination = PaginationService.from(params);
     const scope = req.scope || null;
 
-    const data = await UserSanctionService.getAll(
+    const user = await UserService.getOne(req.params.userId);
+    if (!user) throw NotFoundError('user not found', { logit: false });
+
+    const results = await UserSanctionService.getAll(
       pagination,
       { ...params, userId: req.params.userId },
       { count: true, scope },
     );
 
-    res.status(200).json(data);
+    const data = results.data as IUserSanctionModel[];
+
+    return { ...results, data };
   }
 
-  static async getOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
+  @Middlewares(validate(null, ['body', 'query'], { allowScope: true }))
+  @Middlewares(auth({ allowSelf: true, allowOnlyPermissions: ['user.sanction'] }))
+  @Get('{sanctionId}')
+  public async getOne(@Request() req: AuthRequest) {
     const scope = req.scope || null;
     const { sanctionId, userId } = req.params;
 
-    const data = await UserSanctionService.getOneByUserId(sanctionId, userId, { scope });
+    const user = await UserService.getOne(userId);
+    if (!user) throw NotFoundError('user not found', { logit: false });
 
+    const data = await UserSanctionService.getOneByUserId(sanctionId, userId, { scope });
     if (!data) throw NotFoundError('sanction not found', { logit: false });
 
-    res.status(200).json(data);
+    return data as IUserSanctionModel;
   }
 
-  static async createOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
+  @Middlewares(validate(UserSanctionCreateOneSchema))
+  @Middlewares(auth({ allowOnlyPermissions: ['user.sanction.create'] }))
+  @Post()
+  public async createOne(@Request() req: AuthRequest) {
     const { body, user } = req;
 
     const target = await UserService.getOne(req.params.userId);
@@ -50,45 +70,42 @@ export class UserSanctionController {
     const isAlreadyBanned = await UserSanctionService.isAlreadySanctioned(target.id, ['BAN', 'TEMP_BAN']);
     if (isAlreadyBanned) throw ForbiddenError('this user is already banned', { logit: false });
 
-    const data = await UserSanctionService.createOne({ ...body, userId: target.id, byUserId: user.id });
-
-    res.status(201).json(data);
+    await UserSanctionService.createOne({ ...body, userId: target.id, byUserId: user.id });
   }
 
-  static async cancelOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
-    const {
-      params: { sanctionId, userId },
-    } = req;
+  @Middlewares(auth({ allowOnlyPermissions: ['user.sanction.manage'] }))
+  @Delete('{sanctionId}/cancel')
+  public async cancelOne(@Request() req: AuthRequest) {
+    const { sanctionId, userId } = req.params;
 
     const sanction = await UserSanctionService.getOneByUserId(sanctionId, userId);
 
     if (!sanction) throw NotFoundError('sanction not found', { logit: false });
     await UserSanctionService.cancelOne(sanction, req.body);
-
-    res.status(204).end();
   }
 
-  static async deleteOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
-    const {
-      params: { sanctionId, userId },
-    } = req;
+  @Middlewares(auth({ allowOnlyPermissions: ['user.sanction.remove'] }))
+  @Delete('{sanctionId}')
+  public async deleteOne(@Request() req: AuthRequest) {
+    const { sanctionId, userId } = req.params;
 
-    const sanction = await UserSanctionService.getOneByUserId(sanctionId, userId);
+    const user = await UserService.getOne(userId);
+    if (!user) throw NotFoundError('user not found', { logit: false });
+
+    const sanction = await UserSanctionService.getOne(sanctionId);
 
     if (!sanction) throw NotFoundError('sanction not found', { logit: false });
     await UserSanctionService.deleteOne(sanction);
-
-    res.status(204).end();
   }
 
-  static async clear(request: Request, res: Response) {
-    const req = request as AuthRequest;
+  @Middlewares(auth({ allowOnlyPermissions: ['user.sanction.remove'] }))
+  @Delete()
+  public async clear(@Request() req: AuthRequest) {
     const { userId } = req.params;
 
-    await UserSanctionService.clear(userId);
+    const user = await UserService.getOne(userId);
+    if (!user) throw NotFoundError('user not found', { logit: false });
 
-    res.status(204).end();
+    await UserSanctionService.clear(userId);
   }
 }

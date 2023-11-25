@@ -28,10 +28,10 @@ export const UserPermissions = {
   'list.manage': 1n << 11n,
   'list.remove': 1n << 12n,
 
-  'api.log.view': 1n << 17n,
+  'api.log': 1n << 17n,
   'api.log.manage': 1n << 18n,
 
-  'log.view': 1n << 19n,
+  log: 1n << 19n,
   'log.manage': 1n << 20n,
 };
 

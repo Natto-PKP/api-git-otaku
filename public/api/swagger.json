@@ -1,0 +1,858 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"ErrorType": {
+				"type": "string",
+				"enum": [
+					"FATAL",
+					"ERROR",
+					"WARNING",
+					"INFO",
+					"DEBUG",
+					"TRACE"
+				]
+			},
+			"ErrorCode": {
+				"type": "string",
+				"enum": [
+					"BAD_REQUEST",
+					"INVALID_CREDENTIALS",
+					"USER_ALREADY_EXISTS",
+					"VALIDATION_ERROR",
+					"UNAUTHORIZED",
+					"TOKEN_EXPIRED",
+					"FORBIDDEN",
+					"BLOCKED",
+					"BANNED",
+					"MISSING_PERMISSION",
+					"NOT_FOUND",
+					"ENDPOINT_NOT_FOUND",
+					"METHOD_NOT_ALLOWED",
+					"CONFLICT",
+					"INTERNAL_SERVER_ERROR",
+					"UNKNOW_ERROR",
+					"NOT_IMPLEMENTED",
+					"SERVICE_UNAVAILABLE"
+				],
+				"nullable": false
+			},
+			"Record_string.unknown_": {
+				"properties": {},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ObjectType": {
+				"$ref": "#/components/schemas/Record_string.unknown_"
+			},
+			"IApiLogModel": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"updatedById": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdById": {
+						"type": "string",
+						"nullable": true
+					},
+					"type": {
+						"$ref": "#/components/schemas/ErrorType"
+					},
+					"status": {
+						"type": "number",
+						"format": "double"
+					},
+					"code": {
+						"$ref": "#/components/schemas/ErrorCode"
+					},
+					"message": {
+						"type": "string"
+					},
+					"stack": {
+						"type": "string",
+						"nullable": true
+					},
+					"url": {
+						"type": "string",
+						"nullable": true
+					},
+					"method": {
+						"type": "string",
+						"nullable": true
+					},
+					"params": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ObjectType"
+							}
+						],
+						"nullable": true
+					},
+					"query": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ObjectType"
+							}
+						],
+						"nullable": true
+					},
+					"body": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ObjectType"
+							}
+						],
+						"nullable": true
+					},
+					"headers": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ObjectType"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"type",
+					"status",
+					"code",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"IUserSanctionCommentModel": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"updatedById": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdById": {
+						"type": "string",
+						"nullable": true
+					},
+					"sanctionId": {
+						"type": "string"
+					},
+					"senderId": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					},
+					"edited": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"sanctionId",
+					"senderId",
+					"content",
+					"edited"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserSanctionType": {
+				"type": "string",
+				"enum": [
+					"BAN",
+					"TEMP_BAN",
+					"WARN"
+				]
+			},
+			"IUserSanctionModel": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"updatedById": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdById": {
+						"type": "string",
+						"nullable": true
+					},
+					"userId": {
+						"type": "string"
+					},
+					"reason": {
+						"type": "string"
+					},
+					"type": {
+						"$ref": "#/components/schemas/UserSanctionType"
+					},
+					"expireAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"byUserId": {
+						"type": "string",
+						"nullable": true
+					},
+					"askCancellation": {
+						"type": "boolean"
+					},
+					"askCancellationAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"cancellationReason": {
+						"type": "string",
+						"nullable": true
+					},
+					"isCancelled": {
+						"type": "boolean"
+					},
+					"cancelledAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"cancelledByUserId": {
+						"type": "string",
+						"nullable": true
+					},
+					"cancelledReason": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"reason",
+					"type",
+					"askCancellation",
+					"isCancelled"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserRole": {
+				"type": "string",
+				"enum": [
+					"USER",
+					"HELPER",
+					"MODERATOR",
+					"ADMIN",
+					"SUPER_ADMIN"
+				],
+				"nullable": false
+			},
+			"IUserModel": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"updatedById": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdById": {
+						"type": "string",
+						"nullable": true
+					},
+					"username": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"pseudo": {
+						"type": "string"
+					},
+					"role": {
+						"$ref": "#/components/schemas/UserRole"
+					},
+					"isPrivate": {
+						"type": "boolean"
+					},
+					"isVerified": {
+						"type": "boolean"
+					},
+					"verifiedAt": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"email",
+					"password",
+					"pseudo",
+					"role",
+					"isPrivate",
+					"isVerified"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "api-git-otaku",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/logs": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"limit": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPageSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"totalPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/IApiLogModel"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"limit",
+										"currentPageSize",
+										"total",
+										"totalPage",
+										"currentPage",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"api"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/logs/{apiLogId}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IApiLogModel"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"api"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "DeleteOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"api"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/auth/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"auth"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/auth/register": {
+			"post": {
+				"operationId": "Register",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"auth"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/auth/refresh": {
+			"post": {
+				"operationId": "Refresh",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"auth"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/auth/logout": {
+			"delete": {
+				"operationId": "Logout",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"auth"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{userId}/sanctions/{sanctionId}/comments": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"limit": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPageSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"totalPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/IUserSanctionCommentModel"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"limit",
+										"currentPageSize",
+										"total",
+										"totalPage",
+										"currentPage",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions/{sanctionId}/comments"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions/{sanctionId}/comments"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{userId}/sanctions/{sanctionId}/comments/{commentId}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IUserSanctionCommentModel"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions/{sanctionId}/comments"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"patch": {
+				"operationId": "UpdateOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions/{sanctionId}/comments"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "DeleteOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions/{sanctionId}/comments"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{userId}/sanctions": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"limit": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPageSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"totalPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/IUserSanctionModel"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"limit",
+										"currentPageSize",
+										"total",
+										"totalPage",
+										"currentPage",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "Clear",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{userId}/sanctions/{sanctionId}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IUserSanctionModel"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"delete": {
+				"operationId": "DeleteOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{userId}/sanctions/{sanctionId}/cancel": {
+			"delete": {
+				"operationId": "CancelOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"users/{userId}/sanctions"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users": {
+			"get": {
+				"operationId": "GetAll",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"limit": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPageSize": {
+											"type": "number",
+											"format": "double"
+										},
+										"total": {
+											"type": "number",
+											"format": "double"
+										},
+										"totalPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"currentPage": {
+											"type": "number",
+											"format": "double"
+										},
+										"data": {
+											"items": {
+												"$ref": "#/components/schemas/IUserModel"
+											},
+											"type": "array"
+										}
+									},
+									"required": [
+										"limit",
+										"currentPageSize",
+										"total",
+										"totalPage",
+										"currentPage",
+										"data"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "get all users with pagination and scope",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/users/{identifier}": {
+			"get": {
+				"operationId": "GetOne",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/IUserModel"
+								}
+							}
+						}
+					}
+				},
+				"description": "get specific user with scope",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"description": "user id, username or '@me' to get current user",
+						"in": "path",
+						"name": "identifier",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/users/{userId}": {
+			"delete": {
+				"operationId": "DeleteOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"description": "delete specific user, only current user can delete himself",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"patch": {
+				"operationId": "UpdateOne",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"description": "update specific user, only current user can update himself, users with 'user.manage' permission can update other users",
+				"tags": [
+					"users"
+				],
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

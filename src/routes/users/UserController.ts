@@ -1,38 +1,57 @@
-import type { Request, Response } from 'express';
+import { Controller, Route, Get, Patch, Delete, Request, Middlewares, Path, Tags } from 'tsoa';
+
 import type { AuthRequest } from '../../middlewares/auth';
 import { PaginationService } from '../../utils/PaginationUtil';
 import { UserService } from './UserService';
+import auth from '../../middlewares/auth';
 import { NotFoundError } from '../../errors/BasicError';
 import { UsernameRegex } from '../../models/User/UserUtils';
+import { UserScopes } from '../../models/User/UserScopes';
+import { IUserModel } from '../../models';
+import { validate } from '../../middlewares/validate';
+import { UserGetAllQuerySchema } from './UserSchema';
+import { UserValidation } from './UserValidation';
 
-/**
- * User controller
- */
-export class UserController {
+const scopes = UserScopes;
+
+@Tags('users')
+@Route('users')
+export class UserController extends Controller {
   /**
-   * Get all users
-   * @param request
-   * @param res
+   * get all users with pagination and scope
    */
-  static async getAll(request: Request, res: Response) {
-    const req = request as AuthRequest<false>;
+  @Middlewares(UserValidation.getAllQueryParams)
+  @Middlewares(validate(UserGetAllQuerySchema, ['query', 'body'], { allowPagination: true, allowScope: true }))
+  @Middlewares(auth({ required: false, scopes }))
+  @Get()
+  public async getAll(@Request() req: AuthRequest<false>) {
     const params = { ...req.query, ...req.body };
     const pagination = PaginationService.from(params);
     const scope = req.scope || null;
 
-    const data = await UserService.getAll(pagination, params, { count: true, scope });
+    const results = await UserService.getAll(pagination, params, { count: true, scope });
 
-    res.status(200).json(data);
+    const data = results.data as IUserModel[];
+
+    return { ...results, data };
   }
 
   /**
-   * Get one user
-   * @param request
-   * @param res
+   * get specific user with scope
+   * @param identifier user id, username or '@me' to get current user
    */
-  static async getOne(request: Request, res: Response) {
-    const req = request as AuthRequest<false>;
-    const { identifier } = req.params;
+  @Middlewares(
+    auth({
+      required: false,
+      scopes,
+      allowSelf: true,
+      allowMeParam: true,
+      allowUserIdentifierParam: true,
+      selfParamName: 'identifier',
+    }),
+  )
+  @Get('{identifier}')
+  public async getOne(@Request() req: AuthRequest<false>, @Path() identifier: string) {
     const scope = req.scope || null;
 
     let data = null;
@@ -43,36 +62,30 @@ export class UserController {
 
     if (!data) throw NotFoundError('user not found', { logit: false });
 
-    res.status(200).json(data);
+    return data as IUserModel;
   }
 
   /**
-   * Delete one user
-   * @param request
-   * @param res
+   * delete specific user, only current user can delete himself
    */
-  static async deleteOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
+  @Middlewares(auth({ allowOnlySelf: true }))
+  @Delete('{userId}')
+  public async deleteOne(@Request() req: AuthRequest) {
     const { userId } = req.params;
 
     const user = await UserService.getOne(userId);
     if (!user) throw NotFoundError('user not found', { logit: false });
 
     await UserService.deleteOne(user);
-
-    res.status(204).send();
   }
 
   /**
-   * Update one user
-   * @param request
-   * @param res
+   * update specific user, only current user can update himself, users with 'user.manage' permission can update other users
    */
-  static async updateOne(request: Request, res: Response) {
-    const req = request as AuthRequest;
-
+  @Middlewares(UserValidation.updateOneBodyParams)
+  @Middlewares(auth({ allowSelf: true, allowOnlyPermissions: ['user.manage'] }))
+  @Patch('{userId}')
+  public async updateOne(@Request() req: AuthRequest) {
     await UserService.updateOne(req.params.userId, req.body);
-
-    res.status(200).send();
   }
 }

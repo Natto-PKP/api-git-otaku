@@ -196,6 +196,6 @@ describe('DELETE /logout', () => {
 
     const response = await request.delete('/auth/logout').send();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(204);
   });
 });
