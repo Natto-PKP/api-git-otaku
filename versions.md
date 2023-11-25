@@ -1,3 +1,11 @@
+### # Version 0.4.0
+
+```md
+- Convert routes & controllers to tsoa
+- Add swagger documentation with tsoa
+- Add user sanction comment endpoints, tests & services
+```
+
 ### # Version 0.3.0
 
 ```md
